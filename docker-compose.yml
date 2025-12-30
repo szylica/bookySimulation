@@ -5,3 +5,14 @@ services:
       - '6379:6379'
     container_name: 'inzynierka-redis'
     restart: always
+  db:
+    image: postgres:latest
+    container_name: inzynierka-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=inzynierka
+      - POSTGRES_DB=inzynierka_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
