@@ -1,4 +1,7 @@
-package org.szylica.inzynierka.backend.model.dto;
+package org.szylica.inzynierka.backend.model.error;
 
-public record ErrorDto() {
+public record ErrorDto(String message) {
+
+
+
 }

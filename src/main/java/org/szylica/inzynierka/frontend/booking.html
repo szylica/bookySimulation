@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Umów się — symulacja</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="topbar__inner">
+      <a class="brand" href="./index.html" aria-label="Wróć do listy lokali">
+        <span class="brand__dot" aria-hidden="true"></span>
+        <span class="brand__text">booksy</span>
+        <span class="brand__suffix">symulacja</span>
+      </a>
+
+      <div class="search" role="search">
+        <div class="search__hint" id="bookingHint" aria-live="polite">Umów wizytę (bez backendu)</div>
+      </div>
+
+      <div class="topbar__actions">
+        <button class="theme" type="button" id="themeToggle" aria-pressed="false">Ciemny motyw</button>
+        <button class="login" type="button" id="loginBtn">Zaloguj się</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page" role="main">
+    <section class="section" aria-labelledby="bookingTitle">
+      <div class="section__head">
+        <p class="crumb"><a class="crumb__link" href="./index.html">← Wróć do lokali</a></p>
+        <h1 class="section__title" id="bookingTitle">Umów wizytę</h1>
+        <p class="section__subtitle" id="venueSubtitle">Wybierz termin i potwierdź rezerwację.</p>
+      </div>
+
+      <div class="booking" id="bookingRoot" hidden>
+        <div class="booking__summary card">
+          <div class="card__top">
+            <div>
+              <h2 class="card__name" id="venueName"></h2>
+              <p class="card__category" id="venueMeta"></p>
+            </div>
+            <div class="badge" aria-label="Ocena">
+              <span class="badge__dot" aria-hidden="true"></span>
+              <span id="venueRating"></span>
+            </div>
+          </div>
+
+          <div class="card__meta">
+            <div class="card__row">
+              <span class="card__label">Adres</span>
+              <span class="card__value" id="venueAddress"></span>
+            </div>
+          </div>
+        </div>
+
+        <form class="booking__form card" id="bookingForm">
+          <h2 class="form__title">Wybierz termin</h2>
+
+          <label class="form__label" for="dateInput">Data</label>
+          <input class="form__control" id="dateInput" type="date" required />
+
+          <div class="times" aria-labelledby="timesTitle">
+            <div class="times__head">
+              <h3 class="times__title" id="timesTitle">Dostępne godziny</h3>
+              <p class="times__subtitle" id="timesSubtitle">Wybierz godzinę z listy.</p>
+            </div>
+            <div class="timeGrid" id="timeGrid" role="list"></div>
+            <p class="times__empty" id="timeEmpty" hidden>Brak dostępnych terminów w tym dniu.</p>
+          </div>
+
+          <input id="slotIdInput" type="hidden" required />
+
+          <label class="form__label" for="employeeSelect">Pracownik</label>
+          <select class="form__control" id="employeeSelect" required></select>
+
+          <label class="form__label" for="serviceSelect">Usługa</label>
+          <select class="form__control" id="serviceSelect" required>
+            <option value="">Wybierz usługę</option>
+            <option>Strzyżenie</option>
+            <option>Strzyżenie + broda</option>
+            <option>Koloryzacja</option>
+            <option>Masaż</option>
+            <option>Zabieg kosmetyczny</option>
+          </select>
+
+          <button class="primary" type="submit">Umów się</button>
+          <p class="form__note">To jest symulacja — kliknięcie pokaże potwierdzenie w okienku.</p>
+        </form>
+      </div>
+
+      <div class="empty" id="bookingMissing">
+        <h2 class="empty__title">Nie znaleziono lokalu</h2>
+        <p class="empty__desc">Wróć do listy i wybierz lokal ponownie.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="footer__bottom">
+      <div class="footer__bottomInner">
+        <span>© <span id="year"></span> Symulacja Booksy</span>
+        <span class="footer__muted">To jest projekt demonstracyjny.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./data.js"></script>
+  <script src="./utils.js"></script>
+  <script src="./booking.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package org.szylica.inzynierka;
+package org.szylica.inzynierka.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

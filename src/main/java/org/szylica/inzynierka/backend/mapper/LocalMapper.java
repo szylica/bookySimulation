@@ -1,4 +1,24 @@
 package org.szylica.inzynierka.backend.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.szylica.inzynierka.backend.model.dto.LocalDto;
+import org.szylica.inzynierka.backend.model.entity.LocalEntity;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring", uses = {ServiceMapper.class, VisitMapper.class, UserMapper.class})
 public interface LocalMapper {
+
+    @Mapping(source = "serviceProvider.id", target = "serviceProvider")
+    LocalDto toDto(LocalEntity localEntity);
+
+    @Mapping(target = "serviceProvider", ignore = true)
+    LocalEntity toEntity(LocalDto localDto);
+
+    List<LocalDto> toDtoList(List<LocalEntity> localEntityList);
+
+    List<LocalEntity> toEntityList(List<LocalDto> localDtoList);
+
+
 }

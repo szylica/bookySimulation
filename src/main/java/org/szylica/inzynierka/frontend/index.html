@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Booksy — symulacja</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="topbar__inner">
+      <a class="brand" href="#" aria-label="Strona główna">
+        <span class="brand__dot" aria-hidden="true"></span>
+        <span class="brand__text">booksy</span>
+        <span class="brand__suffix">symulacja</span>
+      </a>
+
+      <div class="search" role="search">
+        <label class="sr-only" for="searchInput">Wyszukaj lokale usługowe</label>
+        <input
+          id="searchInput"
+          class="search__input"
+          type="search"
+          placeholder="Szukaj lokali usługowych (np. fryzjer, barber, masaż…)"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div class="search__hint" id="searchHint" aria-live="polite"></div>
+      </div>
+
+      <div class="topbar__actions">
+        <button class="theme" type="button" id="themeToggle" aria-pressed="false">Ciemny motyw</button>
+        <button class="login" type="button" id="loginBtn">Zaloguj się</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page" role="main">
+    <section class="section" aria-labelledby="sectionTitle">
+      <div class="section__head">
+        <h1 class="section__title" id="sectionTitle">Lokale usługowe</h1>
+        <p class="section__subtitle">Przeglądaj przykładowe lokale (dane mock, bez backendu).</p>
+      </div>
+
+      <div class="grid" id="venuesGrid" aria-live="polite"></div>
+
+      <div class="empty" id="emptyState" hidden>
+        <h2 class="empty__title">Brak wyników</h2>
+        <p class="empty__desc">Spróbuj zmienić frazę wyszukiwania.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <div class="footer__logo">
+          <span class="brand__dot" aria-hidden="true"></span>
+          <span class="footer__name">booksy</span>
+          <span class="footer__suffix">symulacja</span>
+        </div>
+        <p class="footer__desc">Frontend demo do przeglądania lokali usługowych. Backend będzie podpięty później.</p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Stopka">
+        <div class="footer__col">
+          <h2 class="footer__title">Pomoc</h2>
+          <a class="footer__link" href="#" id="supportLink">Kontakt z supportem</a>
+          <a class="footer__link" href="#">FAQ</a>
+          <a class="footer__link" href="#">Zgłoś problem</a>
+        </div>
+
+        <div class="footer__col">
+          <h2 class="footer__title">Informacje</h2>
+          <a class="footer__link" href="#">O nas</a>
+          <a class="footer__link" href="#">Dla firm</a>
+          <a class="footer__link" href="#">Kariera</a>
+        </div>
+
+        <div class="footer__col">
+          <h2 class="footer__title">Dokumenty</h2>
+          <a class="footer__link" href="#">Regulamin</a>
+          <a class="footer__link" href="#">Polityka prywatności</a>
+          <a class="footer__link" href="#">Ustawienia cookies</a>
+        </div>
+      </nav>
+    </div>
+
+    <div class="footer__bottom">
+      <div class="footer__bottomInner">
+        <span>© <span id="year"></span> Symulacja Booksy</span>
+        <span class="footer__muted">To jest projekt demonstracyjny.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./data.js"></script>
+  <script src="./utils.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

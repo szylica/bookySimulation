@@ -1,0 +1,191 @@
+// Shared mock data (no backend).
+// Exposed as a global so pages can use it without a bundler.
+window.VENUES = [
+  {
+    id: "v1",
+    name: "Studio Fryzur Nova",
+    category: "Fryzjer",
+    city: "Kraków",
+    address: "ul. Długa 12",
+    rating: 4.8,
+    reviews: 312,
+    nextSlot: "Dziś 17:30",
+    employees: [
+      { id: "e1", name: "Anna" },
+      { id: "e2", name: "Kasia" },
+      { id: "e3", name: "Marek" },
+    ],
+  },
+  {
+    id: "v2",
+    name: "Barber District",
+    category: "Barber",
+    city: "Kraków",
+    address: "ul. Karmelicka 7",
+    rating: 4.7,
+    reviews: 198,
+    nextSlot: "Jutro 10:00",
+    employees: [
+      { id: "e4", name: "Bartek" },
+      { id: "e5", name: "Kuba" },
+    ],
+  },
+  {
+    id: "v3",
+    name: "Klinika Urody Bellis",
+    category: "Kosmetyczka",
+    city: "Warszawa",
+    address: "ul. Marszałkowska 88",
+    rating: 4.9,
+    reviews: 521,
+    nextSlot: "Dziś 19:15",
+    employees: [
+      { id: "e6", name: "Ola" },
+      { id: "e7", name: "Natalia" },
+      { id: "e8", name: "Monika" },
+    ],
+  },
+  {
+    id: "v4",
+    name: "Masaż & Fizjo Centrum",
+    category: "Masaż",
+    city: "Wrocław",
+    address: "ul. Piłsudskiego 23",
+    rating: 4.6,
+    reviews: 144,
+    nextSlot: "Jutro 14:30",
+    employees: [
+      { id: "e9", name: "Paweł" },
+      { id: "e10", name: "Magda" },
+    ],
+  },
+  {
+    id: "v5",
+    name: "Nail Lab",
+    category: "Paznokcie",
+    city: "Gdańsk",
+    address: "ul. Grunwaldzka 41",
+    rating: 4.5,
+    reviews: 102,
+    nextSlot: "Pojutrze 12:00",
+    employees: [
+      { id: "e11", name: "Zuzia" },
+      { id: "e12", name: "Iga" },
+    ],
+  },
+  {
+    id: "v6",
+    name: "Brow & Lash Studio",
+    category: "Brwi i rzęsy",
+    city: "Poznań",
+    address: "ul. Półwiejska 19",
+    rating: 4.8,
+    reviews: 267,
+    nextSlot: "Jutro 16:45",
+    employees: [
+      { id: "e13", name: "Weronika" },
+      { id: "e14", name: "Patrycja" },
+    ],
+  },
+];
+
+// Mock availability in the exact format the backend will return.
+// In production this should come from Spring Boot API.
+window.MOCK_AVAILABILITY = [
+  {
+    id: 2,
+    startTime: "2026-01-24T07:30:00Z",
+    endTime: "2026-01-24T08:00:00Z",
+    taken: false,
+  },
+  {
+    id: 3,
+    startTime: "2026-01-24T08:00:00Z",
+    endTime: "2026-01-24T08:30:00Z",
+    taken: false,
+  },
+  {
+    id: 4,
+    startTime: "2026-01-24T08:30:00Z",
+    endTime: "2026-01-24T09:00:00Z",
+    taken: false,
+  },
+  {
+    id: 5,
+    startTime: "2026-01-24T09:00:00Z",
+    endTime: "2026-01-24T09:30:00Z",
+    taken: false,
+  },
+  {
+    id: 6,
+    startTime: "2026-01-24T09:30:00Z",
+    endTime: "2026-01-24T10:00:00Z",
+    taken: false,
+  },
+  {
+    id: 7,
+    startTime: "2026-01-24T10:00:00Z",
+    endTime: "2026-01-24T10:30:00Z",
+    taken: false,
+  },
+  {
+    id: 8,
+    startTime: "2026-01-24T10:30:00Z",
+    endTime: "2026-01-24T11:00:00Z",
+    taken: false,
+  },
+  {
+    id: 9,
+    startTime: "2026-01-24T11:00:00Z",
+    endTime: "2026-01-24T11:30:00Z",
+    taken: false,
+  },
+  {
+    id: 10,
+    startTime: "2026-01-24T11:30:00Z",
+    endTime: "2026-01-24T12:00:00Z",
+    taken: false,
+  },
+  {
+    id: 11,
+    startTime: "2026-01-24T12:00:00Z",
+    endTime: "2026-01-24T12:30:00Z",
+    taken: false,
+  },
+  {
+    id: 12,
+    startTime: "2026-01-24T12:30:00Z",
+    endTime: "2026-01-24T13:00:00Z",
+    taken: false,
+  },
+  {
+    id: 13,
+    startTime: "2026-01-24T13:00:00Z",
+    endTime: "2026-01-24T13:30:00Z",
+    taken: false,
+  },
+  {
+    id: 14,
+    startTime: "2026-01-24T13:30:00Z",
+    endTime: "2026-01-24T14:00:00Z",
+    taken: false,
+  },
+  {
+    id: 15,
+    startTime: "2026-01-24T14:00:00Z",
+    endTime: "2026-01-24T14:30:00Z",
+    taken: false,
+  },
+  {
+    id: 16,
+    startTime: "2026-01-24T14:30:00Z",
+    endTime: "2026-01-24T15:00:00Z",
+    taken: false,
+  },
+  {
+    id: 1,
+    startTime: "2026-01-24T07:00:00Z",
+    endTime: "2026-01-24T07:30:00Z",
+    taken: true,
+  },
+];
