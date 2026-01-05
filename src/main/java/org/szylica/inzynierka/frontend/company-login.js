@@ -1,11 +1,11 @@
 const els = {
   themeToggle: document.getElementById("themeToggle"),
   year: document.getElementById("year"),
-  form: document.getElementById("loginForm"),
+  form: document.getElementById("companyLoginForm"),
   email: document.getElementById("email"),
   password: document.getElementById("password"),
-  msg: document.getElementById("loginMsg"),
-  submitBtn: document.querySelector("#loginForm button[type=submit]"),
+  msg: document.getElementById("companyLoginMsg"),
+  submitBtn: document.querySelector("#companyLoginForm button[type=submit]"),
 };
 
 const { setCurrentYear, attachThemeToggle } = window.UIUtils ?? {};
@@ -13,9 +13,9 @@ const { setCurrentYear, attachThemeToggle } = window.UIUtils ?? {};
 setCurrentYear?.(els.year);
 attachThemeToggle?.(els.themeToggle);
 
-async function loginCustomer(payload) {
+async function loginProvider(payload) {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
-  const res = await fetch(`${apiBase}/api/auth/customer/login`, {
+  const res = await fetch(`${apiBase}/api/auth/provider/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -31,9 +31,7 @@ async function loginCustomer(payload) {
   }
 
   const contentType = res.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    return res.json();
-  }
+  if (contentType.includes("application/json")) return res.json();
   return res.text();
 }
 
@@ -58,11 +56,11 @@ els.form?.addEventListener("submit", (e) => {
     els.submitBtn.textContent = "Loguję…";
   }
 
-  loginCustomer(payload)
+  loginProvider(payload)
     .then(() => {
       window.UIUtils?.setAuthLoggedIn?.(true);
       if (els.msg) els.msg.textContent = "Zalogowano. Przekierowuję…";
-      window.location.href = "./index.html";
+      window.location.href = "./business.html";
     })
     .catch((err) => {
       if (els.msg) {

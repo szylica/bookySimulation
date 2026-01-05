@@ -428,6 +428,23 @@ body {
   text-decoration: none;
 }
 
+.login.login--link {
+  color: inherit;
+}
+
+.login.login--link:visited {
+  color: inherit;
+}
+
+.primary.login--link {
+  color: var(--surface);
+}
+
+.cta {
+  width: 100%;
+  padding: 12px 14px;
+}
+
 .times {
   margin-top: 12px;
 }

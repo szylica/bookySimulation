@@ -3,51 +3,52 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zaloguj się — symulacja</title>
+  <title>Logowanie pracownika — symulacja</title>
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar" role="banner">
     <div class="topbar__inner">
-      <a class="brand" href="./index.html" aria-label="Wróć do strony głównej">
+      <a class="brand" href="./worker.html" aria-label="Wróć do panelu pracownika">
         <span class="brand__dot" aria-hidden="true"></span>
         <span class="brand__text">booksy</span>
         <span class="brand__suffix">symulacja</span>
       </a>
 
       <div class="search" role="search">
-        <div class="search__hint" aria-live="polite">Zaloguj się</div>
+        <div class="search__hint" aria-live="polite">Logowanie pracownika</div>
       </div>
 
       <div class="topbar__actions">
         <button class="theme" type="button" id="themeToggle" aria-pressed="false">Ciemny motyw</button>
+        <a class="login login--link" href="./worker-register.html">Rejestracja</a>
       </div>
     </div>
   </header>
 
   <main class="page" role="main">
-    <section class="section" aria-labelledby="loginTitle">
+    <section class="section" aria-labelledby="workerLoginTitle">
       <div class="section__head">
-        <h1 class="section__title" id="loginTitle">Logowanie</h1>
-        <p class="section__subtitle">Wpisz dane logowania, aby kontynuować.</p>
+        <h1 class="section__title" id="workerLoginTitle">Logowanie pracownika</h1>
+        <p class="section__subtitle">Zaloguj się e-mailem i hasłem.</p>
       </div>
 
       <div class="auth">
-        <form class="card auth__card" id="loginForm">
+        <form class="card auth__card" id="workerLoginForm">
           <label class="form__label" for="email">E-mail</label>
           <input class="form__control" id="email" name="email" type="email" autocomplete="email" required />
 
           <label class="form__label" for="password">Hasło</label>
           <input class="form__control" id="password" name="password" type="password" autocomplete="current-password" required />
 
-          <button class="primary" type="submit">Zaloguj się</button>
+          <button class="primary" type="submit">Zaloguj</button>
 
-          <p class="auth__muted" id="loginMsg" aria-live="polite"></p>
+          <p class="auth__muted" id="workerLoginMsg" aria-live="polite"></p>
 
           <p class="auth__linkRow">
             <span class="auth__muted">Nie masz konta?</span>
-            <a class="auth__link" href="./register.html">Zarejestruj się</a>
+            <a class="auth__link" href="./worker-register.html">Zarejestruj się</a>
           </p>
         </form>
       </div>
@@ -64,6 +65,6 @@
   </footer>
 
   <script src="./utils.js"></script>
-  <script src="./login.js"></script>
+  <script src="./worker-login.js"></script>
 </body>
 </html>

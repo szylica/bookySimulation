@@ -4,7 +4,7 @@ To jest statyczny frontend (HTML/CSS/JS) bez backendu.
 
 ## Uruchomienie lokalne
 
-W katalogu z plikami uruchom prosty serwer HTTP:
+Jeśli chcesz uruchomić statycznie (bez bundlera), w katalogu z plikami uruchom prosty serwer HTTP:
 
 ```powershell
 py -m http.server 5173
@@ -12,6 +12,8 @@ py -m http.server 5173
 
 Następnie otwórz:
 - `http://localhost:5173/index.html`
+
+Jeśli uruchamiasz frontend przez osobny dev-serwer (np. na porcie `3000`), a backend Spring Boot działa na `8080`, to rejestracja wysyła requesty na `http://localhost:8080/...`.
 
 ## Struktura
 

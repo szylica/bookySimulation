@@ -3,59 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rejestracja — symulacja</title>
+  <title>Rejestracja firmy — symulacja</title>
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar" role="banner">
     <div class="topbar__inner">
-      <a class="brand" href="./index.html" aria-label="Wróć do strony głównej">
+      <a class="brand" href="./business.html" aria-label="Wróć do strony Dla firm">
         <span class="brand__dot" aria-hidden="true"></span>
         <span class="brand__text">booksy</span>
         <span class="brand__suffix">symulacja</span>
       </a>
 
       <div class="search" role="search">
-        <div class="search__hint" aria-live="polite">Rejestracja</div>
+        <div class="search__hint" aria-live="polite">Rejestracja firmy</div>
       </div>
 
       <div class="topbar__actions">
         <button class="theme" type="button" id="themeToggle" aria-pressed="false">Ciemny motyw</button>
-        <a class="login login--link" href="./login.html">Logowanie</a>
+        <a class="login login--link" href="./company-login.html">Logowanie</a>
       </div>
     </div>
   </header>
 
   <main class="page" role="main">
-    <section class="section" aria-labelledby="registerTitle">
+    <section class="section" aria-labelledby="companyRegisterTitle">
       <div class="section__head">
-        <h1 class="section__title" id="registerTitle">Rejestracja</h1>
-        <p class="section__subtitle">Utwórz konto, aby korzystać z aplikacji.</p>
+        <p class="crumb"><a class="crumb__link" href="./business.html">← Wróć do Dla firm</a></p>
+        <h1 class="section__title" id="companyRegisterTitle">Rejestracja firmy</h1>
+        <p class="section__subtitle">Załóż konto firmowe, aby rozpocząć współpracę.</p>
       </div>
 
       <div class="auth">
-        <form class="card auth__card" id="registerForm">
-          <label class="form__label" for="firstName">Imię</label>
-          <input class="form__control" id="firstName" name="firstName" type="text" autocomplete="given-name" required />
-
-          <label class="form__label" for="lastName">Nazwisko <span class="auth__muted">(opcjonalne)</span></label>
-          <input class="form__control" id="lastName" name="lastName" type="text" autocomplete="family-name" />
-
-          <label class="form__label" for="phone">Telefon</label>
-          <input class="form__control" id="phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" required />
+        <form class="card auth__card" id="companyRegisterForm">
+          <label class="form__label" for="companyName">Nazwa firmy</label>
+          <input class="form__control" id="companyName" name="companyName" type="text" autocomplete="organization" required />
 
           <label class="form__label" for="email">E-mail</label>
           <input class="form__control" id="email" name="email" type="email" autocomplete="email" required />
 
+          <label class="form__label" for="nip">NIP</label>
+          <input class="form__control" id="nip" name="nip" type="text" inputmode="numeric" pattern="[0-9]*" required />
+
           <label class="form__label" for="password">Hasło</label>
           <input class="form__control" id="password" name="password" type="password" autocomplete="new-password" required />
 
-          <button class="primary" type="submit">Utwórz konto</button>
+          <label class="form__label" for="phone">Telefon</label>
+          <input class="form__control" id="phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" required />
+
+          <button class="primary" type="submit">Zarejestruj</button>
+
+          <p class="auth__muted" id="companyRegisterMsg" aria-live="polite"></p>
 
           <p class="auth__linkRow">
-            <span class="auth__muted">Masz już konto?</span>
-            <a class="auth__link" href="./login.html">Zaloguj się</a>
+            <span class="auth__muted">Masz już konto firmowe?</span>
+            <a class="auth__link" href="./company-login.html">Zaloguj się</a>
           </p>
         </form>
       </div>
@@ -72,6 +75,6 @@
   </footer>
 
   <script src="./utils.js"></script>
-  <script src="./register.js"></script>
+  <script src="./company-register.js"></script>
 </body>
 </html>

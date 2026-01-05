@@ -92,7 +92,7 @@ attachThemeToggle?.(els.themeToggle);
 if (els.supportLink) {
   els.supportLink.addEventListener("click", (e) => {
     e.preventDefault();
-    window.alert("Kontakt z supportem będzie dostępny po podpięciu backendu.");
+    window.alert("Kontakt z supportem jest niedostępny w tej wersji demo.");
   });
 }
 

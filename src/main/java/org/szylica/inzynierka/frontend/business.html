@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zaloguj się — symulacja</title>
+  <title>Dla firm — symulacja</title>
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -17,39 +17,31 @@
       </a>
 
       <div class="search" role="search">
-        <div class="search__hint" aria-live="polite">Zaloguj się</div>
+        <div class="search__hint" aria-live="polite">Dla firm</div>
       </div>
 
       <div class="topbar__actions">
         <button class="theme" type="button" id="themeToggle" aria-pressed="false">Ciemny motyw</button>
+        <button class="login" type="button" id="loginBtn">Zaloguj się</button>
       </div>
     </div>
   </header>
 
   <main class="page" role="main">
-    <section class="section" aria-labelledby="loginTitle">
+    <section class="section" aria-labelledby="businessTitle">
       <div class="section__head">
-        <h1 class="section__title" id="loginTitle">Logowanie</h1>
-        <p class="section__subtitle">Wpisz dane logowania, aby kontynuować.</p>
+        <h1 class="section__title" id="businessTitle">Dla firm</h1>
+        <p class="section__subtitle">Poznaj, dlaczego warto współpracować i dołącz do platformy.</p>
       </div>
 
-      <div class="auth">
-        <form class="card auth__card" id="loginForm">
-          <label class="form__label" for="email">E-mail</label>
-          <input class="form__control" id="email" name="email" type="email" autocomplete="email" required />
+      <div class="card auth__card">
+        <h2 class="form__title">Dlaczego warto?</h2>
+        <p class="form__note">Większa widoczność, wygodne umawianie wizyt i lepsza organizacja grafiku w jednym miejscu.</p>
 
-          <label class="form__label" for="password">Hasło</label>
-          <input class="form__control" id="password" name="password" type="password" autocomplete="current-password" required />
-
-          <button class="primary" type="submit">Zaloguj się</button>
-
-          <p class="auth__muted" id="loginMsg" aria-live="polite"></p>
-
-          <p class="auth__linkRow">
-            <span class="auth__muted">Nie masz konta?</span>
-            <a class="auth__link" href="./register.html">Zarejestruj się</a>
-          </p>
-        </form>
+        <div class="auth__linkRow">
+          <a class="primary login--link cta" href="./company-register.html">Zarejestruj firmę</a>
+          <a class="login login--link cta" href="./company-login.html">Zaloguj się (firma)</a>
+        </div>
       </div>
     </section>
   </main>
@@ -64,6 +56,6 @@
   </footer>
 
   <script src="./utils.js"></script>
-  <script src="./login.js"></script>
+  <script src="./business.js"></script>
 </body>
 </html>

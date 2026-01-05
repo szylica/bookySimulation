@@ -2,7 +2,49 @@
 // Exposed as a global so multiple pages can reuse logic.
 
 (function () {
+  // Backend base URL used by auth requests. Can be overridden before this file loads.
+  if (typeof window.API_BASE !== "string" || !window.API_BASE.trim()) {
+    window.API_BASE = "http://localhost:8080";
+  }
+
   const THEME_KEY = "ui.theme";
+  const AUTH_KEY = "auth.loggedIn";
+
+  function getCookieValue(name) {
+    const cookieStr = document?.cookie ?? "";
+    if (!cookieStr) return null;
+
+    const pairs = cookieStr.split(";");
+    for (const pair of pairs) {
+      const trimmed = pair.trim();
+      if (!trimmed) continue;
+      if (!trimmed.startsWith(`${name}=`)) continue;
+      return trimmed.slice(name.length + 1);
+    }
+    return null;
+  }
+
+  function isLoggedIn() {
+    // Prefer real session indicator from backend.
+    // Note: if the cookie is HttpOnly, JS won't see it; then we fall back to localStorage.
+    const session = getCookieValue("SESSION");
+    if (session && session.length > 0) return true;
+
+    try {
+      return window.localStorage?.getItem(AUTH_KEY) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  function setAuthLoggedIn(value) {
+    try {
+      if (value) window.localStorage?.setItem(AUTH_KEY, "1");
+      else window.localStorage?.removeItem(AUTH_KEY);
+    } catch {
+      // ignore
+    }
+  }
 
   function escapeHtml(text) {
     return (text ?? "")
@@ -30,8 +72,32 @@
 
   function attachLoginAlert(loginButton) {
     if (!loginButton) return;
-    loginButton.addEventListener("click", () => {
+
+    const applyLabel = () => {
+      if (isLoggedIn()) {
+        loginButton.textContent = "Wyloguj się";
+        loginButton.setAttribute("aria-label", "Wyloguj się");
+      } else {
+        loginButton.textContent = "Zaloguj się";
+        loginButton.setAttribute("aria-label", "Zaloguj się");
+      }
+    };
+
+    applyLabel();
+
+    loginButton.addEventListener("click", (e) => {
+      if (isLoggedIn()) {
+        // No-op for now (no logout endpoint wired yet).
+        e.preventDefault?.();
+        return;
+      }
       window.location.href = "./login.html";
+    });
+
+    // Keep label in sync if another tab logs in/out.
+    window.addEventListener("storage", (e) => {
+      if (e.key !== AUTH_KEY) return;
+      applyLabel();
     });
   }
 
@@ -107,5 +173,7 @@
     setCurrentYear,
     attachLoginAlert,
     attachThemeToggle,
+    isLoggedIn,
+    setAuthLoggedIn,
   };
 })();

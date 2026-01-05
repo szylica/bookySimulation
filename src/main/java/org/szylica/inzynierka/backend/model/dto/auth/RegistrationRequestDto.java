@@ -15,7 +15,6 @@ import org.szylica.inzynierka.backend.model.utils.UserRole;
 @Builder
 public class RegistrationRequestDto {
 
-    @NotBlank
     private String name;
     private String surname;
 
@@ -32,4 +31,7 @@ public class RegistrationRequestDto {
 
     @NotNull(message = "Role must be selected")
     private UserRole role;
+
+    private String companyName;
+    private String nip;
 }
