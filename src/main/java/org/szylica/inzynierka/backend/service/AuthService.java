@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,21 @@ public class AuthService {
                 .role(user.getRole().name())
                 .name(user.getName())
                 .build();
+    }
+
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        // OBECNA AUTENTYKACJA
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if(auth != null){
+
+
+            // SecurityContextLogoutHandler robi 3 rzeczy:
+            //    - Unieważnia HttpSession (co automatycznie usuwa sesję z Redisa)
+            //    - Czyści SecurityContextHolder
+            //    - Usuwa autentykację z sesji
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
     }
 
 

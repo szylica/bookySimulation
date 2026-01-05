@@ -84,6 +84,7 @@ els.form?.addEventListener("submit", (e) => {
   registerProvider(payload)
     .then(() => {
       window.UIUtils?.setAuthLoggedIn?.(true);
+      window.UIUtils?.setAuthRole?.("ROLE_PROVIDER");
       window.location.href = "./index.html";
     })
     .catch((err) => {

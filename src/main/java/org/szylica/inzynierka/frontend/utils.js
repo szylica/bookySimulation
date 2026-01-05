@@ -9,6 +9,7 @@
 
   const THEME_KEY = "ui.theme";
   const AUTH_KEY = "auth.loggedIn";
+  const AUTH_ROLE_KEY = "auth.role";
 
   function getCookieValue(name) {
     const cookieStr = document?.cookie ?? "";
@@ -39,10 +40,46 @@
 
   function setAuthLoggedIn(value) {
     try {
-      if (value) window.localStorage?.setItem(AUTH_KEY, "1");
-      else window.localStorage?.removeItem(AUTH_KEY);
+      if (value) {
+        window.localStorage?.setItem(AUTH_KEY, "1");
+      } else {
+        window.localStorage?.removeItem(AUTH_KEY);
+        window.localStorage?.removeItem(AUTH_ROLE_KEY);
+      }
     } catch {
       // ignore
+    }
+  }
+
+  function setAuthRole(role) {
+    try {
+      if (!role) {
+        window.localStorage?.removeItem(AUTH_ROLE_KEY);
+        return;
+      }
+      window.localStorage?.setItem(AUTH_ROLE_KEY, role);
+    } catch {
+      // ignore
+    }
+  }
+
+  function getAuthRole() {
+    try {
+      const role = window.localStorage?.getItem(AUTH_ROLE_KEY);
+      return role ? role : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async function logout() {
+    const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+    const url = `${apiBase}/api/auth/logout`;
+
+    const res = await fetch(url, { method: "POST", credentials: "include" });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(text || `HTTP ${res.status}`);
     }
   }
 
@@ -75,11 +112,20 @@
 
     const applyLabel = () => {
       if (isLoggedIn()) {
-        loginButton.textContent = "Wyloguj się";
-        loginButton.setAttribute("aria-label", "Wyloguj się");
+        loginButton.classList.add("login--icon");
+        loginButton.setAttribute("aria-label", "Panel użytkownika");
+        loginButton.title = "Panel użytkownika";
+
+        // Inline SVG to avoid external assets.
+        loginButton.innerHTML =
+          '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">'
+          + '<path fill="currentColor" d="M12 12c2.76 0 5-2.24 5-5S14.76 2 12 2 7 4.24 7 7s2.24 5 5 5Zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5Z"/>'
+          + "</svg>";
       } else {
+        loginButton.classList.remove("login--icon");
         loginButton.textContent = "Zaloguj się";
         loginButton.setAttribute("aria-label", "Zaloguj się");
+        loginButton.removeAttribute("title");
       }
     };
 
@@ -87,8 +133,8 @@
 
     loginButton.addEventListener("click", (e) => {
       if (isLoggedIn()) {
-        // No-op for now (no logout endpoint wired yet).
         e.preventDefault?.();
+        window.location.href = "./account.html";
         return;
       }
       window.location.href = "./login.html";
@@ -175,5 +221,8 @@
     attachThemeToggle,
     isLoggedIn,
     setAuthLoggedIn,
+    setAuthRole,
+    getAuthRole,
+    logout,
   };
 })();

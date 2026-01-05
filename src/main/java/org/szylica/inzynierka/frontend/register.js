@@ -76,6 +76,7 @@ els.form?.addEventListener("submit", (e) => {
   registerCustomer(payload)
     .then(() => {
       window.UIUtils?.setAuthLoggedIn?.(true);
+      window.UIUtils?.setAuthRole?.("ROLE_CUSTOMER");
       window.location.href = "./index.html";
     })
     .catch((err) => {

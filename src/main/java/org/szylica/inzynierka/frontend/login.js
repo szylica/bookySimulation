@@ -26,8 +26,22 @@ async function loginCustomer(payload) {
   });
 
   if (!res.ok) {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      const data = await res.json().catch(() => null);
+      const msg = data?.message || data?.error || "";
+      throw new Error(msg || `HTTP ${res.status}`);
+    }
+
     const text = await res.text().catch(() => "");
-    throw new Error(text || `HTTP ${res.status}`);
+    // Sometimes backends send JSON without content-type; try to extract message anyway.
+    try {
+      const maybe = JSON.parse(text);
+      const msg = maybe?.message || maybe?.error;
+      throw new Error(msg || text || `HTTP ${res.status}`);
+    } catch {
+      throw new Error(text || `HTTP ${res.status}`);
+    }
   }
 
   const contentType = res.headers.get("content-type") || "";
@@ -61,6 +75,7 @@ els.form?.addEventListener("submit", (e) => {
   loginCustomer(payload)
     .then(() => {
       window.UIUtils?.setAuthLoggedIn?.(true);
+      window.UIUtils?.setAuthRole?.("ROLE_CUSTOMER");
       if (els.msg) els.msg.textContent = "Zalogowano. Przekierowuję…";
       window.location.href = "./index.html";
     })

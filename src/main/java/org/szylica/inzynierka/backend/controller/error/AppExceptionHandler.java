@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.szylica.inzynierka.backend.model.error.ErrorDto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,9 +35,9 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Exception> handleAllExceptions(Exception ex) {
+    public ResponseEntity<ErrorDto> handleAllExceptions(Exception ex) {
 
-        return ResponseEntity.badRequest().body(ex);
+        return ResponseEntity.badRequest().body(new ErrorDto(ex.getMessage()));
 
     }
 

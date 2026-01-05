@@ -72,6 +72,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.authenticate(loginRequestDto, request, response, UserRole.ROLE_WORKER));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        authService.logout(request, response);
+        return ResponseEntity.ok().body("Logged out successfully");
+    }
+
     private ResponseEntity<AuthResponse> registerUser(RegistrationRequestDto registerRequest, HttpServletRequest request, HttpServletResponse response, UserRole userRole) {
         UserEntity user = authService.registerUser(registerRequest);
 
