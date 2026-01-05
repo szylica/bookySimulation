@@ -2,16 +2,18 @@ package org.szylica.inzynierka.backend.model.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import lombok.*;
+import org.szylica.inzynierka.backend.model.utils.UserRole;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RegistrationCustomerRequestDto {
+public class RegistrationRequestDto {
 
     @NotBlank
     private String name;
@@ -27,4 +29,7 @@ public class RegistrationCustomerRequestDto {
 
     @NotBlank
     private String phone;
+
+    @NotNull(message = "Role must be selected")
+    private UserRole role;
 }

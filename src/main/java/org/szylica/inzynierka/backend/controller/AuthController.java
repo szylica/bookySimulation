@@ -7,18 +7,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.szylica.inzynierka.backend.model.dto.auth.RegistrationCustomerRequestDto;
+import org.szylica.inzynierka.backend.model.dto.auth.LoginRequestDto;
+import org.szylica.inzynierka.backend.model.dto.auth.RegistrationRequestDto;
 import org.szylica.inzynierka.backend.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/customers/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody RegistrationCustomerRequestDto registerRequest) {
+    public ResponseEntity<Void> register(@Valid @RequestBody RegistrationRequestDto registerRequest) {
 
         authService.registerCustomer(registerRequest);
 
@@ -27,7 +28,17 @@ public class AuthController {
         return ResponseEntity.status(201).build();
     }
 
-    private ResponseEntity<Void> registerServiceProvider(RegistrationCustomerRequestDto registerRequest){
+    @PostMapping("/customers/login")
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
+
+        authService.registerCustomer(loginRequestDto);
+
+
+
+        return ResponseEntity.status(201).build();
+    }
+
+    private ResponseEntity<Void> registerServiceProvider(RegistrationRequestDto registerRequest){
 
 
         return ResponseEntity.status(201).build();

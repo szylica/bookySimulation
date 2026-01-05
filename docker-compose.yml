@@ -5,8 +5,10 @@ services:
       - '6379:6379'
     container_name: 'inzynierka-redis'
     restart: always
+
   db:
     image: postgres:latest
+    platform: linux/arm64
     container_name: inzynierka-postgres
     ports:
       - "5433:5432"
@@ -15,4 +17,7 @@ services:
       - POSTGRES_PASSWORD=inzynierka
       - POSTGRES_DB=inzynierka_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:
