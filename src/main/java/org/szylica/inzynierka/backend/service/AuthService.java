@@ -3,6 +3,7 @@ package org.szylica.inzynierka.backend.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -105,6 +106,21 @@ public class AuthService {
     private boolean isEmailTaken(String email, UserRole role){
         return !userRepository.findByEmailAndRole(email, role).isEmpty();
 
+    }
+
+    public ResponseEntity<AuthResponse> registerUser(RegistrationRequestDto registerRequest, HttpServletRequest request, HttpServletResponse response, UserRole userRole) {
+        UserEntity user = this.registerUser(registerRequest);
+
+        var loginRequestDto = new LoginRequestDto(registerRequest.getEmail(), registerRequest.getPassword());
+
+        var answer = this.authenticate(
+                loginRequestDto,
+                request,
+                response,
+                userRole
+        );
+
+        return ResponseEntity.status(201).body(answer);
     }
 
 }

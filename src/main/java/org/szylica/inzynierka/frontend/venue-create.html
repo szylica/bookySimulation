@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Utwórz lokal — symulacja</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar" role="banner">
+    <div class="topbar__inner">
+      <a class="brand" href="./account.html?tab=myVenues" aria-label="Wróć do panelu użytkownika">
+        <span class="brand__dot" aria-hidden="true"></span>
+        <span class="brand__text">booksy</span>
+        <span class="brand__suffix">symulacja</span>
+      </a>
+
+      <div class="search" role="search">
+        <div class="search__hint" aria-live="polite">Tworzenie lokalu</div>
+      </div>
+
+      <div class="topbar__actions">
+        <button class="theme" type="button" id="themeToggle" aria-pressed="false">Ciemny motyw</button>
+        <button class="login" type="button" id="loginBtn">Zaloguj się</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page page--fluid page--venueCreate" role="main">
+    <section class="section" aria-labelledby="venueCreateTitle">
+      <div class="section__head">
+        <p class="crumb"><a class="crumb__link" href="./account.html?tab=myVenues">← Wróć do Moje lokale</a></p>
+        <h1 class="section__title" id="venueCreateTitle">Utwórz lokal</h1>
+        <p class="section__subtitle">Dodaj podstawowe informacje o lokalu (wersja demo).</p>
+      </div>
+
+      <div class="auth auth--center">
+        <form class="card auth__card auth__card--wide form--inlineRows" id="venueCreateForm">
+          <div class="formRow">
+            <label class="form__label" for="name">Nazwa</label>
+            <input class="form__control" id="name" name="name" type="text" autocomplete="organization" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="address">Adres</label>
+            <input class="form__control" id="address" name="address" type="text" autocomplete="street-address" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="city">Miasto</label>
+            <input class="form__control" id="city" name="city" type="text" autocomplete="address-level2" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="postalCode">Kod pocztowy</label>
+            <input class="form__control" id="postalCode" name="postalCode" type="text" inputmode="numeric" placeholder="np. 30-001" autocomplete="postal-code" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="phone">Numer kontaktowy</label>
+            <input class="form__control" id="phone" name="phone" type="tel" inputmode="numeric" pattern="[0-9+ -]*" autocomplete="tel" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="openTime">Godzina otwarcia lokalu</label>
+            <input class="form__control" id="openTime" name="openTime" type="time" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="closeTime">Godzina zamknięcia</label>
+            <input class="form__control" id="closeTime" name="closeTime" type="time" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="visitLength">Długość wizyty (minuty)</label>
+            <input class="form__control" id="visitLength" name="visitLength" type="number" min="1" step="1" required />
+          </div>
+
+          <div class="formRow">
+            <label class="form__label" for="planningWindow">Okres wyprzedzenia planowania wizyt</label>
+            <select class="form__control" id="planningWindow" name="planningWindow" required>
+              <option value="1">1 dzień</option>
+              <option value="3">3 dni</option>
+              <option value="7">7 dni</option>
+              <option value="14">14 dni</option>
+              <option value="30">30 dni</option>
+              <option value="60">60 dni</option>
+              <option value="90">90 dni</option>
+            </select>
+          </div>
+
+          <p class="form__note">Możliwość dodania pracowników oraz usług będzie dostępna po utworzeniu lokalu.</p>
+
+          <button class="primary" type="submit">Utwórz lokal</button>
+
+          <p class="auth__muted" id="venueCreateMsg" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="footer__bottom">
+      <div class="footer__bottomInner">
+        <span>© <span id="year"></span> Symulacja Booksy</span>
+        <span class="footer__muted">To jest projekt demonstracyjny.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./utils.js"></script>
+  <script src="./venue-create.js"></script>
+</body>
+</html>

@@ -259,6 +259,19 @@ body {
   flex: 1 0 auto;
 }
 
+.page--fluid {
+  max-width: none;
+}
+
+.page--venueCreate .section__title {
+  font-size: 2.05rem;
+}
+
+.page--venueCreate .section__subtitle {
+  font-size: 1.16rem;
+  color: var(--text);
+}
+
 .page--account {
   max-width: 1440px;
   margin: 0;
@@ -329,6 +342,16 @@ body {
 .card--link:focus {
   outline: none;
   box-shadow: 0 0 0 4px var(--ring);
+}
+
+.card--add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 142px;
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--muted);
 }
 
 .card__top {
@@ -411,6 +434,16 @@ body {
   color: var(--muted);
 }
 
+.notice {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  color: var(--text);
+  font-weight: 650;
+}
+
 .booking {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -442,6 +475,58 @@ body {
 .form__control:focus {
   border-color: var(--focus);
   box-shadow: 0 0 0 4px var(--ring);
+}
+
+.form--inlineRows {
+  font-size: 1.14rem;
+}
+
+.form--inlineRows .formRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.form--inlineRows .formRow + .formRow {
+  margin-top: 16px;
+}
+
+.form--inlineRows .form__label {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.22rem;
+  font-weight: 750;
+}
+
+.form--inlineRows .form__control {
+  width: 56%;
+  margin-left: auto;
+  font-size: 1.14rem;
+}
+
+.form--inlineRows .form__note {
+  color: var(--text);
+  font-size: 1.12rem;
+}
+
+.form--inlineRows .form__title {
+  font-size: 1.34rem;
+}
+
+.form--inlineRows .primary {
+  font-size: 1.14rem;
+}
+
+@media (max-width: 720px) {
+  .form--inlineRows .formRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form--inlineRows .form__control {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 .primary {
@@ -476,8 +561,22 @@ body {
   place-items: start;
 }
 
+.auth--center {
+  place-items: center;
+}
+
 .auth__card {
   width: min(520px, 100%);
+}
+
+.auth__card.auth__card--wide {
+  width: 60vw;
+}
+
+@media (max-width: 860px) {
+  .auth__card.auth__card--wide {
+    width: 100%;
+  }
 }
 
 .auth__linkRow {

@@ -37,9 +37,19 @@
   </header>
 
   <main class="page" role="main">
+    <div class="notice" id="flashNotice" role="status" aria-live="polite" hidden></div>
+
+    <section class="section" id="nearbySection" aria-labelledby="nearbyTitle" hidden>
+      <div class="section__head">
+        <h1 class="section__title" id="nearbyTitle">Lokale blisko ciebie</h1>
+      </div>
+
+      <div class="grid" id="nearbyGrid" aria-live="polite"></div>
+    </section>
+
     <section class="section" aria-labelledby="sectionTitle">
       <div class="section__head">
-        <h1 class="section__title" id="sectionTitle">Lokale usługowe</h1>
+        <h1 class="section__title" id="sectionTitle">Polecane lokale</h1>
         <p class="section__subtitle">Przeglądaj przykładowe lokale (dane mock, bez backendu).</p>
       </div>
 

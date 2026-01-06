@@ -26,7 +26,7 @@ public class AuthController {
     @PostMapping("/customer/register")
     public ResponseEntity<AuthResponse> registerCustomer(@Valid @RequestBody RegistrationRequestDto registerRequest, HttpServletRequest request, HttpServletResponse response) {
 
-        return registerUser(
+        return authService.registerUser(
                 registerRequest,
                 request,
                 response,
@@ -36,14 +36,20 @@ public class AuthController {
 
     @PostMapping("/customer/login")
     public ResponseEntity<AuthResponse> loginCustomer(@Valid @RequestBody LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(authService.authenticate(loginRequestDto, request, response, UserRole.ROLE_CUSTOMER));
+        return ResponseEntity.ok(
+                authService.authenticate(
+                        loginRequestDto,
+                        request,
+                        response,
+                        UserRole.ROLE_CUSTOMER
+                ));
 
     }
 
     @PostMapping("/provider/register")
     public ResponseEntity<AuthResponse> registerProvider(@Valid @RequestBody RegistrationRequestDto registerRequest, HttpServletRequest request, HttpServletResponse response) {
 
-        return registerUser(
+        return authService.registerUser(
                 registerRequest,
                 request,
                 response,
@@ -53,13 +59,19 @@ public class AuthController {
 
     @PostMapping("/provider/login")
     public ResponseEntity<AuthResponse> loginProvider(@Valid @RequestBody LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(authService.authenticate(loginRequestDto, request, response, UserRole.ROLE_PROVIDER));
+        return ResponseEntity.ok(
+                authService.authenticate(
+                        loginRequestDto,
+                        request,
+                        response,
+                        UserRole.ROLE_PROVIDER
+                ));
     }
 
     @PostMapping("/worker/register")
     public ResponseEntity<AuthResponse> registerWorker(@Valid @RequestBody RegistrationRequestDto registerRequest, HttpServletRequest request, HttpServletResponse response) {
 
-        return registerUser(
+        return authService.registerUser(
                 registerRequest,
                 request,
                 response,
@@ -69,28 +81,19 @@ public class AuthController {
 
     @PostMapping("/worker/login")
     public ResponseEntity<AuthResponse> loginWorker(@Valid @RequestBody LoginRequestDto loginRequestDto, HttpServletRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(authService.authenticate(loginRequestDto, request, response, UserRole.ROLE_WORKER));
+        return ResponseEntity.ok(
+                authService.authenticate(
+                        loginRequestDto,
+                        request, response,
+                        UserRole.ROLE_WORKER
+                )
+        );
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         authService.logout(request, response);
         return ResponseEntity.ok().body("Logged out successfully");
-    }
-
-    private ResponseEntity<AuthResponse> registerUser(RegistrationRequestDto registerRequest, HttpServletRequest request, HttpServletResponse response, UserRole userRole) {
-        UserEntity user = authService.registerUser(registerRequest);
-
-        var loginRequestDto = new LoginRequestDto(registerRequest.getEmail(), registerRequest.getPassword());
-
-        var answer = authService.authenticate(
-                loginRequestDto,
-                request,
-                response,
-                userRole
-        );
-
-        return ResponseEntity.status(201).body(answer);
     }
 
 }

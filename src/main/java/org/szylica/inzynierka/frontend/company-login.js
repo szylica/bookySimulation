@@ -8,10 +8,15 @@ const els = {
   submitBtn: document.querySelector("#companyLoginForm button[type=submit]"),
 };
 
-const { setCurrentYear, attachThemeToggle } = window.UIUtils ?? {};
+const { setCurrentYear, attachThemeToggle, isLoggedIn, getAuthRole } =
+  window.UIUtils ?? {};
 
 setCurrentYear?.(els.year);
 attachThemeToggle?.(els.themeToggle);
+
+if (isLoggedIn?.() && (getAuthRole?.() ?? "") === "ROLE_PROVIDER") {
+  window.location.href = "./account.html";
+}
 
 async function loginProvider(payload) {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
@@ -74,7 +79,7 @@ els.form?.addEventListener("submit", (e) => {
       window.UIUtils?.setAuthLoggedIn?.(true);
       window.UIUtils?.setAuthRole?.("ROLE_PROVIDER");
       if (els.msg) els.msg.textContent = "Zalogowano. Przekierowuję…";
-      window.location.href = "./business.html";
+      window.location.href = "./account.html";
     })
     .catch((err) => {
       if (els.msg) {

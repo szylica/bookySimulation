@@ -13,6 +13,9 @@ public class LocalShortDto {
 
     private Long id;
     private String name;
+    private String city;
     private String address;
+    private String phone;
+    private Long serviceProvider;
 
 }

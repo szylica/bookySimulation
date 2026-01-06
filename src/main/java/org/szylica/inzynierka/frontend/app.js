@@ -1,8 +1,13 @@
 const venues = Array.isArray(window.VENUES) ? window.VENUES : [];
 
+let userLocation = null;
+
 const els = {
   searchInput: document.getElementById("searchInput"),
   searchHint: document.getElementById("searchHint"),
+  flashNotice: document.getElementById("flashNotice"),
+  nearbySection: document.getElementById("nearbySection"),
+  nearbyGrid: document.getElementById("nearbyGrid"),
   grid: document.getElementById("venuesGrid"),
   empty: document.getElementById("emptyState"),
   themeToggle: document.getElementById("themeToggle"),
@@ -19,6 +24,19 @@ const {
   attachThemeToggle,
 } =
   window.UIUtils ?? {};
+
+function showFlashIfPresent() {
+  if (!els.flashNotice) return;
+  try {
+    const msg = window.localStorage?.getItem("ui.flash");
+    if (!msg) return;
+    els.flashNotice.textContent = msg;
+    els.flashNotice.hidden = false;
+    window.localStorage?.removeItem("ui.flash");
+  } catch {
+    // ignore
+  }
+}
 
 function matchesQuery(venue, query) {
   if (!query) return true;
@@ -68,7 +86,26 @@ function renderCard(venue) {
   return card;
 }
 
-function render(query) {
+function hasCoords(venue) {
+  return Number.isFinite(venue?.lat) && Number.isFinite(venue?.lng);
+}
+
+function haversineKm(a, b) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+
+  const sinDLat = Math.sin(dLat / 2);
+  const sinDLng = Math.sin(dLng / 2);
+  const h =
+    sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLng * sinDLng;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function renderRecommended(query) {
   const filtered = venues.filter((v) => matchesQuery(v, query));
 
   els.grid.replaceChildren(...filtered.map(renderCard));
@@ -82,12 +119,63 @@ function render(query) {
   }
 }
 
+function renderNearby(query) {
+  if (!els.nearbySection || !els.nearbyGrid) return;
+  if (!userLocation) {
+    els.nearbySection.hidden = true;
+    return;
+  }
+
+  const ranked = venues
+    .filter((v) => hasCoords(v))
+    .filter((v) => matchesQuery(v, query))
+    .map((v) => ({ venue: v, distanceKm: haversineKm(userLocation, v) }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, 3)
+    .map((x) => x.venue);
+
+  els.nearbyGrid.replaceChildren(...ranked.map(renderCard));
+  els.nearbySection.hidden = ranked.length === 0;
+}
+
+function renderAll() {
+  const query = els.searchInput?.value ?? "";
+  renderNearby(query);
+  renderRecommended(query);
+}
+
+function initGeolocation() {
+  if (!els.nearbySection || !els.nearbyGrid) return;
+  if (!("geolocation" in navigator)) return;
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLocation = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+      };
+      renderAll();
+    },
+    () => {
+      // User denied / unavailable — keep the section hidden.
+      userLocation = null;
+      renderAll();
+    },
+    {
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 5 * 60 * 1000,
+    }
+  );
+}
+
 els.searchInput.addEventListener("input", () => {
-  render(els.searchInput.value);
+  renderAll();
 });
 
 attachLoginAlert?.(els.loginBtn);
 attachThemeToggle?.(els.themeToggle);
+showFlashIfPresent();
 
 if (els.supportLink) {
   els.supportLink.addEventListener("click", (e) => {
@@ -100,4 +188,5 @@ if (els.year) {
   setCurrentYear?.(els.year);
 }
 
-render("");
+initGeolocation();
+renderAll();

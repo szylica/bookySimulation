@@ -8,8 +8,21 @@
   }
 
   const THEME_KEY = "ui.theme";
+  const FLASH_KEY = "ui.flash";
   const AUTH_KEY = "auth.loggedIn";
   const AUTH_ROLE_KEY = "auth.role";
+
+  function setFlashMessage(text) {
+    try {
+      if (!text) {
+        window.localStorage?.removeItem(FLASH_KEY);
+        return;
+      }
+      window.localStorage?.setItem(FLASH_KEY, String(text));
+    } catch {
+      // ignore
+    }
+  }
 
   function getCookieValue(name) {
     const cookieStr = document?.cookie ?? "";
@@ -72,11 +85,57 @@
     }
   }
 
+  function isAuthPagePath(pathname) {
+    const path = (pathname ?? "").toString().toLowerCase();
+    return (
+      path.endsWith("/login.html") ||
+      path.endsWith("/register.html") ||
+      path.endsWith("/company-login.html") ||
+      path.endsWith("/company-register.html") ||
+      path.endsWith("/worker-login.html") ||
+      path.endsWith("/worker-register.html")
+    );
+  }
+
+  function handleSessionExpired(options) {
+    // Clear local UI auth state and move user to login.
+    // We only do this when backend explicitly says session is invalid (401/403).
+    setAuthLoggedIn(false);
+    setAuthRole(null);
+
+    setFlashMessage(
+      options?.message ??
+        "Twoja sesja wygasła — zostałeś wylogowany. Zaloguj się ponownie."
+    );
+
+    const redirectTo = options?.redirectTo ?? "./index.html";
+    const pathname = window.location?.pathname ?? "";
+    if (!isAuthPagePath(pathname)) {
+      window.location.href = redirectTo;
+    }
+  }
+
+  async function apiFetch(input, init) {
+    const opts = { ...(init ?? {}) };
+    if (!opts.credentials) opts.credentials = "include";
+
+    const res = await fetch(input, opts);
+    if (res.status === 401 || res.status === 403) {
+      handleSessionExpired();
+      const err = new Error("SESSION_EXPIRED");
+      err.code = "SESSION_EXPIRED";
+      throw err;
+    }
+    return res;
+  }
+
   async function logout() {
     const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
     const url = `${apiBase}/api/auth/logout`;
 
     const res = await fetch(url, { method: "POST", credentials: "include" });
+    // If session already expired/invalid, treat as logged out.
+    if (res.status === 401 || res.status === 403) return;
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(text || `HTTP ${res.status}`);
@@ -223,6 +282,8 @@
     setAuthLoggedIn,
     setAuthRole,
     getAuthRole,
+    apiFetch,
+    handleSessionExpired,
     logout,
   };
 })();
