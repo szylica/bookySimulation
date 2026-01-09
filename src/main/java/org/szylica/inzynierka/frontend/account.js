@@ -135,6 +135,123 @@ function renderMyVenues() {
     });
 }
 
+function buildOptionalPayloadFromForm(formEl, fields) {
+  const payload = {};
+  for (const f of fields) {
+    const el = formEl?.querySelector?.(`[name="${CSS.escape(f)}"]`);
+    if (!el) continue;
+    const raw = (el.value ?? "").toString().trim();
+    if (raw.length === 0) continue; // pola nieobowiązkowe
+    payload[f] = raw;
+  }
+  return payload;
+}
+
+async function updateCustomerAccount(payload) {
+  const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+  const url = `${apiBase}/api/customer/change-settings`;
+
+  const res = await (apiFetch?.(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload ?? {}),
+  }) ?? fetch(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload ?? {}),
+    credentials: "include",
+  }));
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  // backend może nie zwracać body
+  return res.json().catch(() => null);
+}
+
+function renderCustomerAccountSettings() {
+  if (!els.content) return;
+
+  const title = document.createElement("h2");
+  title.className = "form__title";
+  title.textContent = "Ustawienia konta";
+
+  const note = document.createElement("p");
+  note.className = "form__note";
+  note.textContent = "Możesz zmienić wybrane dane.";
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "auth__card account__customerSettings";
+
+  wrapper.innerHTML = `
+    <form class="form form--inlineRows" id="customerAccountForm">
+      <div class="formRow">
+        <label class="form__label" for="customerFirstName">Imię</label>
+        <input class="form__control" id="customerFirstName" type="text" name="name" autocomplete="given-name" placeholder="np. Jan" />
+      </div>
+
+      <div class="formRow">
+        <label class="form__label" for="customerLastName">Nazwisko</label>
+        <input class="form__control" id="customerLastName" type="text" name="surname" autocomplete="family-name" placeholder="np. Kowalski" />
+      </div>
+
+      <div class="formRow">
+        <label class="form__label" for="customerEmail">E-mail</label>
+        <input class="form__control" id="customerEmail" type="email" name="email" autocomplete="email" placeholder="np. jan@example.com" />
+      </div>
+
+      <div class="formRow">
+        <label class="form__label" for="customerPhone">Telefon</label>
+        <input class="form__control" id="customerPhone" type="tel" name="phone" autocomplete="tel" placeholder="np. 500 600 700" />
+      </div>
+
+      <button class="primary" type="submit" id="customerAccountSaveBtn">Zapisz zmiany</button>
+      <p class="form__note" id="customerAccountMsg" aria-live="polite"></p>
+    </form>
+  `;
+
+  els.content.replaceChildren(title, note, wrapper);
+
+  const form = wrapper.querySelector("#customerAccountForm");
+  const msg = wrapper.querySelector("#customerAccountMsg");
+  const btn = wrapper.querySelector("#customerAccountSaveBtn");
+
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault?.();
+    if (msg) msg.textContent = "";
+
+    const payload = buildOptionalPayloadFromForm(form, [
+      "name",
+      "surname",
+      "email",
+      "phone",
+    ]);
+
+    if (Object.keys(payload).length === 0) {
+      if (msg) msg.textContent = "Uzupełnij przynajmniej jedno pole, żeby wysłać zmiany.";
+      return;
+    }
+
+    const prevDisabled = btn?.disabled;
+    if (btn) btn.disabled = true;
+
+    Promise.resolve()
+      .then(() => updateCustomerAccount(payload))
+      .then(() => {
+        if (msg) msg.textContent = "Zapisano.";
+        form?.reset?.();
+      })
+      .catch((err) => {
+        if (msg) msg.textContent = `Nie udało się zapisać: ${err?.message ?? err}`;
+      })
+      .finally(() => {
+        if (btn) btn.disabled = !!prevDisabled;
+      });
+  });
+}
+
 function renderContent(tabId) {
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0];
   if (els.subtitle) els.subtitle.textContent = tab.label;
@@ -143,6 +260,18 @@ function renderContent(tabId) {
 
   if (tab.id === "myVenues") {
     renderMyVenues();
+
+    for (const btn of els.tabs?.querySelectorAll?.("button[data-tab]") ?? []) {
+      btn.setAttribute(
+        "aria-current",
+        btn.getAttribute("data-tab") === tab.id ? "page" : "false"
+      );
+    }
+    return;
+  }
+
+  if (tab.id === "account" && role === "ROLE_CUSTOMER") {
+    renderCustomerAccountSettings();
 
     for (const btn of els.tabs?.querySelectorAll?.("button[data-tab]") ?? []) {
       btn.setAttribute(

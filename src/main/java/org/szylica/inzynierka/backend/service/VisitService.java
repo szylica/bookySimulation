@@ -14,4 +14,5 @@ public class VisitService {
     public void saveVisit(VisitEntity visitEntity){
         visitRepository.save(visitEntity);
     }
+
 }
