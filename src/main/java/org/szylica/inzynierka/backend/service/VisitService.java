@@ -25,9 +25,7 @@ public class VisitService {
         visitRepository.deleteById(visitId);
     }
 
-    public List<VisitEntity> getUserVisits(UserEntity userEntity){
-        return visitRepository.findAllByCustomerId(userEntity.getId());
+    public List<VisitEntity> getUserVisits(Long userId){
+        return visitRepository.findAllByCustomerId(userId);
     }
-
-
 }

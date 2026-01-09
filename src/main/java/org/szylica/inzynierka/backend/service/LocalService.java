@@ -81,4 +81,8 @@ public class LocalService {
         return localRepository.findRandomLocals();
     }
 
+    public LocalEntity findById(Long id){
+        return localRepository.findById(id).orElseThrow();
+    }
+
 }

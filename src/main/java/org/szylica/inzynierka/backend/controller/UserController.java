@@ -41,7 +41,7 @@ public class UserController {
 
     @GetMapping("/my-reservations")
     public ResponseEntity<List<VisitDto>> myReservations(){
-        var visits = visitService.getUserVisits(SecurityUtils.getCurrentUserEntity());
+        var visits = visitService.getUserVisits(SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok().body(visitMapper.toDtoList(visits));
     }
 

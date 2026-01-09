@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 import org.szylica.inzynierka.backend.repository.UserRepository;
 
 
-import java.util.Optional;
-
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {

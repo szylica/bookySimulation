@@ -549,6 +549,18 @@ body {
   box-shadow: var(--shadow);
 }
 
+.primary:disabled,
+.primary[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.primary:disabled:hover,
+.primary[disabled]:hover {
+  box-shadow: none;
+}
+
 .primary:focus {
   outline: none;
   box-shadow: 0 0 0 4px var(--ring-strong);

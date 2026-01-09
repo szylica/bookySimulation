@@ -71,7 +71,8 @@ function renderCard(venue) {
     if (venue?.address) params.set("address", String(venue.address));
     if (venue?.phone) params.set("phone", String(venue.phone));
     if (venue?.companyName) params.set("companyName", String(venue.companyName));
-    if (venue?.id) params.set("localId", String(venue.id));
+    const localIdNum = Number(venue?.id);
+    if (Number.isFinite(localIdNum)) params.set("localId", String(localIdNum));
 
     card.href = `./booking.html?${params.toString()}`;
     card.setAttribute(

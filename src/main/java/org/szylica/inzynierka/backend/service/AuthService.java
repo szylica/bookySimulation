@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
+import org.szylica.inzynierka.backend.model.dto.AuthPrincipal;
 import org.szylica.inzynierka.backend.model.dto.auth.AuthResponse;
 import org.szylica.inzynierka.backend.model.dto.auth.LoginRequestDto;
 import org.szylica.inzynierka.backend.model.dto.auth.RegistrationRequestDto;
@@ -68,9 +69,16 @@ public class AuthService {
             throw new BadCredentialsException("Błędne hasło");
         }
 
+        var principal = new AuthPrincipal(
+                user.getId(),
+                user.getEmail(),
+                user.getRole(),
+                user.getName()
+        );
+
         // TWORZENIE OBIEKTU AUTHENTICATION DLA KONKRETNEGO UŻYTKOWNIKA
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                user, null, user.getAuthorities());
+                principal, null, user.getAuthorities());
 
         // ZAPISUJEMY W SecurityContext I SESJI
         SecurityContext context = SecurityContextHolder.createEmptyContext();

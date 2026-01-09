@@ -19,4 +19,8 @@ public interface AvailabilityRepository extends JpaRepository<AvailabilityEntity
     List<AvailabilityEntity> findAllByLocalIdAndIsTakenIsFalse(Long localId, boolean isTaken);
 
     List<AvailabilityEntity> findAllByStartTimeBetween(ZonedDateTime startTimeAfter, ZonedDateTime startTimeBefore);
+
+    List<AvailabilityEntity> findAllByStartTimeBetweenAndLocal(ZonedDateTime of, ZonedDateTime of1, LocalEntity localEntity);
+
+    List<AvailabilityEntity> findAllByStartTimeBetweenAndId(ZonedDateTime startTimeAfter, ZonedDateTime startTimeBefore, Long id);
 }

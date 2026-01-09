@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.szylica.inzynierka.backend.mapper.AvailabilityMapper;
 import org.szylica.inzynierka.backend.model.dto.AvailabilityDto;
+import org.szylica.inzynierka.backend.model.dto.LocalDto;
 import org.szylica.inzynierka.backend.model.entity.AvailabilityEntity;
 import org.szylica.inzynierka.backend.model.entity.LocalEntity;
 import org.szylica.inzynierka.backend.repository.AvailabilityRepository;
@@ -87,10 +88,14 @@ public class AvailabilityService {
         return findClosestFreeTerm(localRepository.findById(localId).orElseThrow());
     }
 
-    public List<AvailabilityEntity> findAllAvailabilitiesForDay(LocalDate date, ZoneId zoneId){
-        return availabilityRepository.findAllByStartTimeBetween(
-                ZonedDateTime.of(date, LocalTime.MIN, zoneId),
-                ZonedDateTime.of(date, LocalTime.MAX, zoneId)
+    public List<AvailabilityEntity> findAllAvailabilitiesForDay(LocalDate date, LocalDto localDto){
+
+        LocalEntity localEntity = localRepository.findById(localDto.getId()).orElseThrow();
+
+        return availabilityRepository.findAllByStartTimeBetweenAndLocal(
+                ZonedDateTime.of(date, LocalTime.MIN, localEntity.getZoneId()),
+                ZonedDateTime.of(date, LocalTime.MAX, localEntity.getZoneId()),
+                localRepository.findById(localEntity.getId()).orElseThrow()
         );
     }
 
