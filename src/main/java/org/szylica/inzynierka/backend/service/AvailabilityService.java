@@ -8,11 +8,9 @@ import org.szylica.inzynierka.backend.model.dto.AvailabilityDto;
 import org.szylica.inzynierka.backend.model.entity.AvailabilityEntity;
 import org.szylica.inzynierka.backend.model.entity.LocalEntity;
 import org.szylica.inzynierka.backend.repository.AvailabilityRepository;
+import org.szylica.inzynierka.backend.repository.LocalRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +21,7 @@ public class AvailabilityService {
 
     private final AvailabilityRepository availabilityRepository;
     private final AvailabilityMapper availabilityMapper;
+    private final LocalRepository localRepository;
 
     @Transactional
     public void generateSlotsForDay(LocalEntity localEntity, LocalDate date){
@@ -42,8 +41,8 @@ public class AvailabilityService {
 
             var slot = AvailabilityEntity.builder()
                     .local(localEntity)
-                    .startTime(currentZdt.toInstant())
-                    .endTime(currentZdt.plusMinutes(durationInMinutes).toInstant())
+                    .startTime(currentZdt)
+                    .endTime(currentZdt.plusMinutes(durationInMinutes))
                     .isTaken(false)
                     .build();
 
@@ -73,10 +72,26 @@ public class AvailabilityService {
     }
 
     public AvailabilityDto findClosestFreeTerm(LocalEntity localEntity){
+        var localZone = localRepository.findById(localEntity.getId()).orElseThrow().getZoneId();
         return availabilityRepository.findAllByLocalAndIsTakenIsFalse(localEntity, false)
                 .stream().min(Comparator.comparing(AvailabilityEntity::getStartTime))
-                        .map(availabilityMapper::toDto).orElse(null);
+                .map(av -> new AvailabilityDto(
+                        av.getId(),
+                        av.getStartTime().withZoneSameLocal(localZone),
+                        av.getEndTime().withZoneSameLocal(localZone),
+                        av.isTaken()
+                )).orElse(null);
+    }
 
+    public AvailabilityDto findClosestFreeTermById(Long localId){
+        return findClosestFreeTerm(localRepository.findById(localId).orElseThrow());
+    }
+
+    public List<AvailabilityEntity> findAllAvailabilitiesForDay(LocalDate date, ZoneId zoneId){
+        return availabilityRepository.findAllByStartTimeBetween(
+                ZonedDateTime.of(date, LocalTime.MIN, zoneId),
+                ZonedDateTime.of(date, LocalTime.MAX, zoneId)
+        );
     }
 
 }

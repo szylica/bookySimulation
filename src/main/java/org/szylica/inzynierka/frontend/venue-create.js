@@ -41,6 +41,11 @@ function setMsg(text) {
   if (els.msg) els.msg.textContent = text ?? "";
 }
 
+els.phone?.addEventListener?.("input", () => {
+  const digitsOnly = (els.phone.value ?? "").toString().replace(/\D+/g, "");
+  if (els.phone.value !== digitsOnly) els.phone.value = digitsOnly;
+});
+
 function toLocalTimeString(value) {
   const v = (value ?? "").toString().trim();
   if (!v) return "";
@@ -52,7 +57,7 @@ function toLocalTimeString(value) {
 
 async function createLocal(payload) {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
-  const url = `${apiBase}/api/provider/add-local`;
+  const url = `${apiBase}/api/user/add-local`;
 
   const res = await (apiFetch?.(url, {
     method: "POST",

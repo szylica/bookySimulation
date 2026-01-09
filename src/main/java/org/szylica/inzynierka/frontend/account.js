@@ -32,6 +32,8 @@ if (!isLoggedIn?.()) {
 
 const role = getAuthRole?.() ?? "ROLE_CUSTOMER";
 
+let myLocalsPrefetch = null;
+
 const TABS_BY_ROLE = {
   ROLE_CUSTOMER: [
     { id: "account", label: "Ustawienia konta" },
@@ -52,7 +54,7 @@ const tabs = TABS_BY_ROLE[role] ?? TABS_BY_ROLE.ROLE_CUSTOMER;
 
 async function fetchMyLocals() {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
-  const url = `${apiBase}/api/provider/my-locals`;
+  const url = `${apiBase}/api/user/my-locals`;
 
   const res = await apiFetch?.(url, { method: "GET" }) ?? await fetch(url, { method: "GET", credentials: "include" });
   if (!res.ok) {
@@ -62,6 +64,30 @@ async function fetchMyLocals() {
 
   const data = await res.json().catch(() => null);
   return Array.isArray(data) ? data : [];
+}
+
+function validateSessionOnEnter() {
+  const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+
+  // Best-effort generic endpoint (if backend exposes it). 404 is ignored.
+  const authMeUrl = `${apiBase}/api/auth/me`;
+  Promise.resolve()
+    .then(() => apiFetch?.(authMeUrl, { method: "GET", headers: { Accept: "application/json" } }))
+    .then((res) => {
+      if (!res || res.status === 404) return;
+      // For non-2xx, apiFetch doesn't throw (except 401/403). Ignore.
+    })
+    .catch(() => {
+      // SESSION_EXPIRED is handled by apiFetch (redirect + flash).
+    });
+
+  // Role-based check for provider: validates session immediately on panel entry.
+  if (role === "ROLE_PROVIDER") {
+    myLocalsPrefetch = fetchMyLocals();
+    myLocalsPrefetch.catch(() => {
+      // Any 401/403 triggers auto-logout via apiFetch.
+    });
+  }
 }
 
 function renderLocalCard(local) {
@@ -124,7 +150,11 @@ function renderMyVenues() {
   els.content.replaceChildren(title, note, grid);
 
   Promise.resolve()
-    .then(() => fetchMyLocals())
+    .then(() => {
+      const p = myLocalsPrefetch ?? fetchMyLocals();
+      myLocalsPrefetch = null;
+      return p;
+    })
     .then((locals) => {
       note.textContent = "";
       const cards = [renderAddVenueCard(), ...locals.map(renderLocalCard)];
@@ -149,7 +179,7 @@ function buildOptionalPayloadFromForm(formEl, fields) {
 
 async function updateCustomerAccount(payload) {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
-  const url = `${apiBase}/api/customer/change-settings`;
+  const url = `${apiBase}/api/user/change-settings`;
 
   const res = await (apiFetch?.(url, {
     method: "PATCH",
@@ -204,7 +234,7 @@ function renderCustomerAccountSettings() {
 
       <div class="formRow">
         <label class="form__label" for="customerPhone">Telefon</label>
-        <input class="form__control" id="customerPhone" type="tel" name="phone" autocomplete="tel" placeholder="np. 500 600 700" />
+        <input class="form__control" id="customerPhone" type="tel" name="phone" inputmode="numeric" pattern="[0-9]*" autocomplete="tel" placeholder="np. 500600700" />
       </div>
 
       <button class="primary" type="submit" id="customerAccountSaveBtn">Zapisz zmiany</button>
@@ -217,6 +247,12 @@ function renderCustomerAccountSettings() {
   const form = wrapper.querySelector("#customerAccountForm");
   const msg = wrapper.querySelector("#customerAccountMsg");
   const btn = wrapper.querySelector("#customerAccountSaveBtn");
+  const phone = wrapper.querySelector("#customerPhone");
+
+  phone?.addEventListener?.("input", () => {
+    const digitsOnly = (phone.value ?? "").toString().replace(/\D+/g, "");
+    if (phone.value !== digitsOnly) phone.value = digitsOnly;
+  });
 
   form?.addEventListener("submit", (e) => {
     e.preventDefault?.();
@@ -334,6 +370,8 @@ function renderTabs() {
 }
 
 renderTabs();
+
+validateSessionOnEnter();
 
 const tabFromUrl = new URLSearchParams(window.location.search).get("tab");
 const initialTab = tabs.some((t) => t.id === tabFromUrl) ? tabFromUrl : tabs[0]?.id;

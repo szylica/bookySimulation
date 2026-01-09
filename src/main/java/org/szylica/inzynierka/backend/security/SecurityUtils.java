@@ -19,5 +19,13 @@ public class SecurityUtils {
         throw new RuntimeException("User is not logged in");
     }
 
+    public static UserEntity getCurrentUserEntity(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth != null && auth.getPrincipal() instanceof UserEntity user){
+            return user;
+        }
+        throw new RuntimeException("User is not logged in");
+    }
+
 
 }

@@ -17,7 +17,7 @@ public interface LocalMapper {
     @Mapping(target = "serviceProvider", ignore = true)
     LocalEntity toEntity(LocalDto localDto);
 
-    @Mapping(source = "serviceProvider.id", target = "serviceProvider")
+    //@Mapping(source = "serviceProvider.id", target = "serviceProvider")
     LocalShortDto toShortDto(LocalEntity localEntity);
 
     List<LocalDto> toDtoList(List<LocalEntity> localEntityList);

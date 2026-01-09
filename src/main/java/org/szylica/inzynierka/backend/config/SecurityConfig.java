@@ -44,7 +44,7 @@ public class SecurityConfig {
                 // LUB CZY MA MIEC JAKAS ROLE DO WEJSCIA GDZIES
                 // KOLEJNOŚĆ MA ZNACZENIE OD NAJBARDZIEJ OGÓLNYCH DO NAJBARDZIEJ KONKRETNYCH
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/allLocals2", "/api/auth/**").permitAll() //Publiczne
+                        .requestMatchers( "/api/auth/**", "/api/main/**").permitAll() //Publiczne
                         .anyRequest().authenticated() // Zalogowani
                         // .hasRole("PROVIDER")
                         // .hasAnyRole("CUSTOMER", "PROVIDER")
@@ -67,7 +67,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Adres frontendu
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 

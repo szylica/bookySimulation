@@ -21,7 +21,7 @@ public class VisitEntity {
     LocalDate date;
     LocalTime time;
     // Cena będzie kopiowana z usługi aby uniknąć zmian ceny wizyty gdyby cena usługi zmieniła się po umówieniu wizyty
-    BigDecimal price;
+    Double price;
 
 
     @ManyToOne
@@ -42,10 +42,10 @@ public class VisitEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private UserEntity customer2;
+    private UserEntity customer;
 
     @ManyToOne
     @JoinColumn(name = "worker_id")
-    private UserEntity worker2;
+    private UserEntity worker;
 
 }

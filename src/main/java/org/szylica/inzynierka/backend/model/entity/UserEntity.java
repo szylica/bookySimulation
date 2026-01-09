@@ -39,10 +39,10 @@ public class UserEntity implements UserDetails {
     @OneToMany(mappedBy = "serviceProvider")
     private List<LocalEntity> localsProviders;
 
-    @OneToMany(mappedBy = "customer2")
+    @OneToMany(mappedBy = "customer")
     private List<VisitEntity> userVisits;
 
-    @OneToMany(mappedBy = "worker2")
+    @OneToMany(mappedBy = "worker")
     private List<VisitEntity> workerVisits;
 
 

@@ -36,6 +36,23 @@ function getVenueId() {
   return params.get("venue");
 }
 
+function getVenueOverridesFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const name = params.get("name");
+  const city = params.get("city");
+  const address = params.get("address");
+  const phone = params.get("phone");
+  const companyName = params.get("companyName");
+
+  return {
+    name: name ? String(name) : null,
+    city: city ? String(city) : null,
+    address: address ? String(address) : null,
+    phone: phone ? String(phone) : null,
+    companyName: companyName ? String(companyName) : null,
+  };
+}
+
 function toLocalDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -206,7 +223,19 @@ function init() {
   attachThemeToggle?.(els.themeToggle);
 
   const venueId = getVenueId();
-  const venue = venues.find((v) => v.id === venueId);
+  const baseVenue = venues.find((v) => v.id === venueId);
+
+  const overrides = getVenueOverridesFromUrl();
+  const venue = baseVenue
+    ? {
+        ...baseVenue,
+        name: overrides.name ?? baseVenue.name,
+        city: overrides.city ?? baseVenue.city,
+        address: overrides.address ?? baseVenue.address,
+        phone: overrides.phone ?? baseVenue.phone,
+        companyName: overrides.companyName ?? baseVenue.companyName,
+      }
+    : null;
 
   if (!venue) {
     els.bookingRoot.hidden = true;

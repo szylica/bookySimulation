@@ -16,10 +16,10 @@ public class VisitDto {
 
     private Long id;
 
-    LocalDate date;
-    LocalTime time;
+    private LocalDate date;
+    private LocalTime time;
     // Cena będzie kopiowana z usługi aby uniknąć zmian ceny wizyty gdyby cena usługi zmieniła się po umówieniu wizyty
-    BigDecimal price;
+    private Double price;
 
     private Long localId;
     private Long serviceId;

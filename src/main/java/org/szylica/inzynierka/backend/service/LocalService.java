@@ -14,6 +14,7 @@ import org.szylica.inzynierka.backend.repository.LocalRepository;
 import org.szylica.inzynierka.backend.repository.UserRepository;
 import org.szylica.inzynierka.backend.security.SecurityUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,6 +26,7 @@ public class LocalService {
     private final AvailabilityRepository availabilityRepository;
     private final GeoService geoService;
     private final UserRepository userRepository;
+    private final AvailabilityService availabilityService;
 
     public List<UserEntity> findAllWorkersByLocal(LocalEntity localEntity){
         return localRepository.findAllByWorkers_Id(localEntity);
@@ -69,6 +71,14 @@ public class LocalService {
                 .build();
 
         localRepository.save(localEntity);
+
+        //TODO
+        //dodać możliwość ustawiania przez użytkownika od kiedy lokal ma zacząć działac
+        availabilityService.setUpSlotsFirstTime(localEntity, LocalDate.now());
+    }
+
+    public List<LocalEntity> findRandomLocals(){
+        return localRepository.findRandomLocals();
     }
 
 }

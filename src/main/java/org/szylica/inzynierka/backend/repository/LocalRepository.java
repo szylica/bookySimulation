@@ -14,4 +14,7 @@ public interface LocalRepository extends JpaRepository<LocalEntity, Long> {
 
     //@Query("SELECT l FROM LocalEntity l WHERE l.serviceProvider.id = ?1")
     List<LocalEntity> findAllByServiceProviderId(Long id);
+
+    @Query(nativeQuery = true, value = "SELECT * FROM locals ORDER BY RANDOM() LIMIT 9")
+    List<LocalEntity> findRandomLocals();
 }

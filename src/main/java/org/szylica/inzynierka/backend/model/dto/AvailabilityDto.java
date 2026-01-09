@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 public class AvailabilityDto {
     private Long id;
-    private Instant startTime;
-    private Instant endTime;
+    private ZonedDateTime startTime;
+    private ZonedDateTime endTime;
     private boolean isTaken;
 }

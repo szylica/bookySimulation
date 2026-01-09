@@ -12,8 +12,8 @@ public interface VisitMapper {
 
     @Mapping(source = "local.id", target = "localId")
     @Mapping(source = "service.id", target = "serviceId")
-    @Mapping(source = "worker2.id", target = "workerId")
-    @Mapping(source = "customer2.id", target = "customerId")
+    @Mapping(source = "worker.id", target = "workerId")
+    @Mapping(source = "customer.id", target = "customerId")
     VisitDto toDto(VisitEntity visitEntity);
 
     VisitEntity toEntity(VisitDto visitDto);

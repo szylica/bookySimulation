@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "availabilities")
@@ -16,8 +17,8 @@ public class AvailabilityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Instant startTime;
-    private Instant endTime;
+    private ZonedDateTime startTime;
+    private ZonedDateTime endTime;
     private boolean isTaken;
 
     @ManyToOne
