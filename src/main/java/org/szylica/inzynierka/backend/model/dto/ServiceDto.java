@@ -1,9 +1,6 @@
 package org.szylica.inzynierka.backend.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.szylica.inzynierka.backend.model.entity.LocalEntity;
 
 import java.time.Duration;
@@ -12,13 +9,13 @@ import java.time.Duration;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class ServiceDto {
 
     private Long id;
-    private Long localId;
     private String name;
     private String description;
     private Double price;
-    private Duration duration;
+    private Long duration;
 
 }

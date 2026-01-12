@@ -1,16 +1,20 @@
 package org.szylica.inzynierka.backend.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.szylica.inzynierka.backend.mapper.LocalMapper;
+import org.szylica.inzynierka.backend.mapper.ServiceMapper;
 import org.szylica.inzynierka.backend.model.dto.LocalDto;
 import org.szylica.inzynierka.backend.model.dto.LocalShortDto;
 import org.szylica.inzynierka.backend.model.dto.LonAndLat;
 import org.szylica.inzynierka.backend.model.entity.LocalEntity;
+import org.szylica.inzynierka.backend.model.entity.ServiceEntity;
 import org.szylica.inzynierka.backend.model.entity.UserEntity;
 import org.szylica.inzynierka.backend.model.utils.GeoUtils;
 import org.szylica.inzynierka.backend.repository.AvailabilityRepository;
 import org.szylica.inzynierka.backend.repository.LocalRepository;
+import org.szylica.inzynierka.backend.repository.ServiceRepository;
 import org.szylica.inzynierka.backend.repository.UserRepository;
 import org.szylica.inzynierka.backend.security.SecurityUtils;
 
@@ -23,10 +27,10 @@ public class LocalService {
 
     private final LocalRepository localRepository;
     private final LocalMapper localMapper;
-    private final AvailabilityRepository availabilityRepository;
     private final GeoService geoService;
     private final UserRepository userRepository;
     private final AvailabilityService availabilityService;
+    private final ServiceRepository serviceRepository;
 
     public List<UserEntity> findAllWorkersByLocal(LocalEntity localEntity){
         return localRepository.findAllByWorkers_Id(localEntity);
@@ -38,8 +42,6 @@ public class LocalService {
 
     public List<LocalDto> findAllLocals(){
         var entities = localRepository.findAll();
-        System.out.println("---------------- W SERWISIE ----------------");
-        System.out.println(entities);
         return localMapper.toDtoList(entities);
     }
 
@@ -55,6 +57,7 @@ public class LocalService {
         LonAndLat lonAndLat = geoService.getLonAndLat(geoService.getCityData(localDto.getCity()));
 
         var zoneId = GeoUtils.getZoneId(lonAndLat.lat(), lonAndLat.lon());
+
 
         var localEntity = LocalEntity.builder()
                 .name(localDto.getName())
@@ -73,7 +76,8 @@ public class LocalService {
         localRepository.save(localEntity);
 
         //TODO
-        //dodać możliwość ustawiania przez użytkownika od kiedy lokal ma zacząć działac
+        // dodać możliwość ustawiania przez użytkownika od kiedy lokal ma zacząć działac
+        // usprawnic requesty do bazy danych, żeby nie wysyłało 1000 tylko 1 przy tworzeniu wielu obiektów
         availabilityService.setUpSlotsFirstTime(localEntity, LocalDate.now());
     }
 
@@ -81,8 +85,32 @@ public class LocalService {
         return localRepository.findRandomLocals();
     }
 
-    public LocalEntity findById(Long id){
-        return localRepository.findById(id).orElseThrow();
+    @Transactional
+    public LocalDto findById(Long id){
+        var entity = localRepository.findById(id).orElseThrow();
+        return localMapper.toDto(entity);
     }
+
+    public void addWorkerToLocal(Long workerId, Long localId){
+        var userEntity = userRepository.findById(workerId).orElseThrow();
+        var localEntity = localRepository.findById(localId).orElseThrow();
+
+        localEntity.addWorker(userEntity);
+        localRepository.save(localEntity);
+    }
+
+    @Transactional
+    public void setUpServicesForLocal(Long localId, List<Long> serviceIds){
+        var localEntity = localRepository.findById(localId).orElseThrow();
+
+        List<ServiceEntity> serviceEntities = serviceRepository.findAllById(serviceIds);
+
+
+        localEntity.addAllServices(serviceEntities);
+        localRepository.save(localEntity);
+
+    }
+
+
 
 }

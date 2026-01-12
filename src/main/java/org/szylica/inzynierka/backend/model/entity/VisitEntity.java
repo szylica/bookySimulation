@@ -8,6 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "visits")
@@ -18,10 +19,9 @@ public class VisitEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    LocalDate date;
-    LocalTime time;
+    private ZonedDateTime date;
     // Cena będzie kopiowana z usługi aby uniknąć zmian ceny wizyty gdyby cena usługi zmieniła się po umówieniu wizyty
-    Double price;
+    private Double price;
 
 
     @ManyToOne

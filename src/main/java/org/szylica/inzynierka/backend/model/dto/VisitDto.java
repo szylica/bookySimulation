@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,8 +18,7 @@ public class VisitDto {
 
     private Long id;
 
-    private LocalDate date;
-    private LocalTime time;
+    private ZonedDateTime startTime;
     // Cena będzie kopiowana z usługi aby uniknąć zmian ceny wizyty gdyby cena usługi zmieniła się po umówieniu wizyty
     private Double price;
 

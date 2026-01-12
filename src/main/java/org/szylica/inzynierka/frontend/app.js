@@ -140,7 +140,14 @@ function renderRecommended(query) {
 
   els.grid.replaceChildren(...filtered.map(renderCard));
 
-  els.empty.hidden = filtered.length !== 0;
+  // Keep layout stable when backend returns no locals:
+  // - don't show the dashed empty-state box (it changes page spacing)
+  // - just render an empty grid area (CSS provides min-height)
+  if (mainLocals.length === 0) {
+    els.empty.hidden = true;
+  } else {
+    els.empty.hidden = filtered.length !== 0;
+  }
 
   if (els.searchHint) {
     if (!query) {
@@ -153,8 +160,14 @@ function renderRecommended(query) {
 
 function renderNearby(query) {
   if (!els.nearbySection || !els.nearbyGrid) return;
+  if (mainLocals.length === 0) {
+    els.nearbyGrid.replaceChildren();
+    els.nearbySection.hidden = false;
+    return;
+  }
   if (!userLocation) {
-    els.nearbySection.hidden = true;
+    els.nearbyGrid.replaceChildren();
+    els.nearbySection.hidden = false;
     return;
   }
 
@@ -167,7 +180,8 @@ function renderNearby(query) {
     .map((x) => x.venue);
 
   els.nearbyGrid.replaceChildren(...ranked.map(renderCard));
-  els.nearbySection.hidden = ranked.length === 0;
+  // Keep the section visible even when no nearby results.
+  els.nearbySection.hidden = false;
 }
 
 function renderAll() {
@@ -188,8 +202,38 @@ function getMockMetaByIndex(idx) {
   return { rating: 4.7, reviews: 120 };
 }
 
+function parseBackendZonedDateTimeToUserDate(value) {
+  if (value instanceof Date) return value;
+  if (typeof value === "number") return new Date(value);
+
+  const raw = (value ?? "").toString().trim();
+  if (!raw) return new Date(NaN);
+
+  // Jackson can serialize ZonedDateTime as e.g.
+  // - 2026-01-12T10:00:00Z
+  // - 2026-01-12T10:00:00+00:00
+  // - 2026-01-12T10:00:00+0000
+  // - 2026-01-12T10:00:00+00:00[UTC]
+  // Sometimes it may come without offset (still representing UTC).
+  // NOTE: Per backend contract in this project, times are stored as UTC and should be
+  // shown in the user's local timezone. We therefore treat the *clock time* as UTC
+  // even if an offset is present in the string.
+  let s = raw.replace(/\[[^\]]+\]$/, "");
+
+  // Normalize +HHMM / -HHMM into +HH:MM / -HH:MM
+  s = s.replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
+
+  // Treat the provided local date-time as UTC (ignore any explicit offset).
+  // Example: 2026-01-12T15:40:00+01:00 => 2026-01-12T15:40:00Z
+  s = s.replace(/(Z|[+-]\d{2}:\d{2})$/, "");
+  s = s.replace(" ", "T") + "Z";
+
+  return new Date(s);
+}
+
 function formatNextSlotFromStartTime(startTime) {
-  const dt = new Date(startTime);
+  // Backend stores ZonedDateTime in UTC; show in user's local timezone.
+  const dt = parseBackendZonedDateTimeToUserDate(startTime);
   if (!Number.isFinite(dt.getTime())) return "—";
 
   const hh = String(dt.getHours()).padStart(2, "0");
@@ -255,13 +299,14 @@ async function loadMainLocals() {
       };
     });
 
-    // If backend returns nothing, keep a fallback list from mocks.
-    if (mainLocals.length === 0) {
-      mainLocals = mockVenues.slice(0, 9);
+    // If backend returns nothing, show no locals.
+    if (mainLocals.length === 0 && els.searchHint) {
+      els.searchHint.textContent = "Brak lokali.";
     }
   } catch {
-    // Fallback to mock data if API is unavailable.
-    mainLocals = mockVenues.slice(0, 9);
+    // If API is unavailable, show no locals.
+    mainLocals = [];
+    if (els.searchHint) els.searchHint.textContent = "Nie udało się wczytać lokali.";
   } finally {
     renderAll();
   }
@@ -311,8 +356,8 @@ if (els.year) {
   setCurrentYear?.(els.year);
 }
 
-// Default initial list (fallback) before API loads.
-mainLocals = mockVenues.slice(0, 9);
+// Start empty; list will be loaded from backend.
+mainLocals = [];
 initGeolocation();
 renderAll();
 loadMainLocals();

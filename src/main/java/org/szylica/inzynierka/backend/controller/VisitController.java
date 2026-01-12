@@ -53,7 +53,7 @@ public class VisitController {
     }
 
     @GetMapping("/findFirstavailableVisit")
-    public AvailabilityDto findFirstavailableVisit(){
+    public AvailabilityDto findFirstAvailableVisit(){
         var local = localRepository.findById(1L).orElseThrow();
         return availabilityService.findClosestFreeTerm(local);
     }

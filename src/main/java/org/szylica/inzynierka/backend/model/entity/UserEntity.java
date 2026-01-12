@@ -45,9 +45,13 @@ public class UserEntity implements UserDetails {
     @OneToMany(mappedBy = "worker")
     private List<VisitEntity> workerVisits;
 
+    @OneToMany(mappedBy = "serviceProvider")
+    private List<ServiceEntity> services;
 
     @ManyToMany(mappedBy = "workers", fetch = FetchType.LAZY)
     private List<LocalEntity> localsWorkers;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

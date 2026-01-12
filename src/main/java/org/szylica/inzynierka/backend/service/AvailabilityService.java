@@ -11,6 +11,7 @@ import org.szylica.inzynierka.backend.model.entity.LocalEntity;
 import org.szylica.inzynierka.backend.repository.AvailabilityRepository;
 import org.szylica.inzynierka.backend.repository.LocalRepository;
 
+import java.sql.SQLOutput;
 import java.time.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,28 +28,29 @@ public class AvailabilityService {
     @Transactional
     public void generateSlotsForDay(LocalEntity localEntity, LocalDate date){
 
-        LocalTime openingTime = localEntity.getOpeningTime();
-        LocalTime closingTime = localEntity.getClosingTime();
+        var openingTime = localEntity.getOpeningTime();
+        var closingTime = localEntity.getClosingTime();
         int durationInMinutes = localEntity.getVisitDurationInMinutes();
 
         var zoneId = localEntity.getZoneId();
 
-        ZonedDateTime currentZdt = ZonedDateTime.of(date, openingTime, zoneId);
-        ZonedDateTime closingZdt = ZonedDateTime.of(date, closingTime, zoneId);
+        var openingZonedDateTime = ZonedDateTime.of(date, openingTime, zoneId);
+        var closingZonedDateTime = ZonedDateTime.of(date, closingTime, zoneId);
+
 
         List<AvailabilityEntity> availabilities = new ArrayList<>();
-        while(currentZdt.plusMinutes(durationInMinutes).isBefore(closingZdt) ||
-                currentZdt.plusMinutes(durationInMinutes).isEqual(closingZdt)){
+        while(openingZonedDateTime.plusMinutes(durationInMinutes).isBefore(closingZonedDateTime) ||
+                openingZonedDateTime.plusMinutes(durationInMinutes).isEqual(closingZonedDateTime)){
 
             var slot = AvailabilityEntity.builder()
                     .local(localEntity)
-                    .startTime(currentZdt)
-                    .endTime(currentZdt.plusMinutes(durationInMinutes))
+                    .startTime(openingZonedDateTime)
+                    .endTime(openingZonedDateTime.plusMinutes(durationInMinutes))
                     .isTaken(false)
                     .build();
 
             availabilities.add(slot);
-            currentZdt = currentZdt.plusMinutes(durationInMinutes);
+            openingZonedDateTime = openingZonedDateTime.plusMinutes(durationInMinutes);
         }
 
         availabilityRepository.saveAll(availabilities);
@@ -73,9 +75,14 @@ public class AvailabilityService {
     }
 
     public AvailabilityDto findClosestFreeTerm(LocalEntity localEntity){
-        var localZone = localRepository.findById(localEntity.getId()).orElseThrow().getZoneId();
-        return availabilityRepository.findAllByLocalAndIsTakenIsFalse(localEntity, false)
-                .stream().min(Comparator.comparing(AvailabilityEntity::getStartTime))
+
+        var localZone = localEntity.getZoneId();
+
+        return availabilityRepository
+                .findFirstByLocalAndIsTakenFalseAndStartTimeIsAfter(localEntity, ZonedDateTime.now(ZoneId.of("UTC")))
+                .stream()
+                .peek(System.out::println)
+                .findFirst()
                 .map(av -> new AvailabilityDto(
                         av.getId(),
                         av.getStartTime().withZoneSameLocal(localZone),
@@ -92,11 +99,16 @@ public class AvailabilityService {
 
         LocalEntity localEntity = localRepository.findById(localDto.getId()).orElseThrow();
 
-        return availabilityRepository.findAllByStartTimeBetweenAndLocal(
+         var availabilitiesForDay = availabilityRepository.findAllByStartTimeBetweenAndLocal(
                 ZonedDateTime.of(date, LocalTime.MIN, localEntity.getZoneId()),
                 ZonedDateTime.of(date, LocalTime.MAX, localEntity.getZoneId()),
                 localRepository.findById(localEntity.getId()).orElseThrow()
         );
+
+        return availabilitiesForDay
+                .stream()
+                .filter(av -> av.getStartTime().isAfter(ZonedDateTime.now(ZoneId.of("UTC"))))
+                .toList();
     }
 
 }

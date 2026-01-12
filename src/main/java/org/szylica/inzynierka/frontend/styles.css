@@ -206,12 +206,32 @@ body {
 
 .account__nav {
   display: grid;
-  gap: 8px;
+  gap: 14px;
   align-content: start;
   padding: 6px 18px 6px 6px;
   border-right: 1px solid var(--border);
   position: sticky;
   top: 76px;
+}
+
+.account__tabs {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.account__navActions {
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.account__logout {
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.account__navActions .auth__muted {
+  margin: 10px 0 0;
 }
 
 .account__tab {
@@ -324,6 +344,22 @@ body {
   gap: 14px;
 }
 
+/* Keep home page layout stable only when there are no cards.
+   When there is 1 card, avoid stretching it to fill the whole reserved space. */
+#nearbyGrid:empty {
+  min-height: clamp(160px, 20vh, 260px);
+}
+
+#venuesGrid:empty {
+  min-height: clamp(240px, 45vh, 560px);
+}
+
+#nearbyGrid,
+#venuesGrid {
+  align-content: start;
+  align-items: start;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -341,6 +377,300 @@ body {
 
 .card--link:hover {
   box-shadow: var(--shadow);
+}
+
+.account__localBtn {
+  width: 100%;
+  text-align: left;
+}
+
+.account__localBtn--active {
+  border-color: rgba(20, 21, 26, 0.28);
+  box-shadow: 0 0 0 4px var(--ring-weak);
+}
+
+html[data-theme="dark"] .account__localBtn--active {
+  border-color: rgba(245, 247, 255, 0.28);
+}
+
+.account__localBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring-strong);
+}
+
+.account__localDetails {
+  margin-top: 16px;
+}
+
+.account__localDetailsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.account__localDetailsTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+
+.account__localDetailsClose {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.account__localDetailsClose:hover {
+  box-shadow: var(--shadow);
+}
+
+.account__divider {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+.account__subTitle {
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+}
+
+.account__pillList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account__pillRow {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--ring-weak);
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account__pillText {
+  display: inline-block;
+}
+
+.account__iconBtn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account__iconBtn:hover {
+  color: var(--text);
+  box-shadow: 0 0 0 4px var(--ring-weak);
+}
+
+.account__iconBtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+.account__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.account__pill {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--ring-weak);
+  font-weight: 650;
+}
+
+.account__checks {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.account__checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--ring-weak);
+}
+
+.account__serviceRow {
+  justify-content: space-between;
+}
+
+.account__serviceAssignedRow {
+  justify-content: space-between;
+}
+
+.account__serviceAssignedMain {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.account__serviceAssignedName {
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.account__serviceAssignedMeta {
+  font-size: 0.9rem;
+}
+
+.account__servicesHead {
+  gap: 12px;
+}
+
+.account__servicesHead .account__localDetailsTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.account__servicesHead #addServiceToggle {
+  flex: 0 0 auto;
+  width: auto;
+  margin-top: 0;
+  padding: 10px 12px;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.account__servicesPanel {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--ring-weak);
+}
+
+.account__serviceForm {
+  margin: 0;
+}
+
+.account__serviceFormRow2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account__serviceFormActions {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.account__servicesGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.account__serviceCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--ring-weak);
+  padding: 12px;
+}
+
+.account__serviceCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.account__serviceMain {
+  min-width: 0;
+}
+
+.account__serviceName {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.account__serviceMeta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.93rem;
+}
+
+.account__serviceId {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+  border: 1px solid var(--border);
+  background: transparent;
+  border-radius: 999px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.account__serviceDesc {
+  margin-top: 10px;
+  color: var(--text);
+  opacity: 0.92;
+  line-height: 1.35;
+}
+
+@media (max-width: 720px) {
+  .account__servicesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .account__serviceFormRow2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account__checkRow input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.account__details {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  background: var(--ring-weak);
+  margin: 10px 0 12px;
+}
+
+.account__detailsSummary {
+  cursor: pointer;
+  font-weight: 750;
+  list-style: none;
+}
+
+.account__detailsSummary::-webkit-details-marker {
+  display: none;
 }
 
 .card--link:focus {
@@ -545,6 +875,19 @@ body {
   cursor: pointer;
 }
 
+/* Subtle variant (ONLY in local details options) */
+.account__localDetails .primary.primary--subtle {
+  background: var(--ring-weak);
+  color: var(--text);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.account__localDetails .primary.primary--subtle:hover {
+  background: var(--ring);
+  box-shadow: none;
+}
+
 .primary:hover {
   box-shadow: var(--shadow);
 }
@@ -570,6 +913,22 @@ body {
   margin: 10px 0 0;
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+.account__hint {
+  margin-top: 8px;
+  font-size: 0.70rem;
+  line-height: 1.25;
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+/* Override the larger inlineRows note styling for the small hint */
+.form--inlineRows .form__note.account__hint {
+  font-size: 0.70rem;
+  line-height: 1.25;
+  color: var(--muted);
+  opacity: 0.65;
 }
 
 .auth {

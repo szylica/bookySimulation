@@ -35,13 +35,14 @@
       </div>
 
       <div class="account">
-        <nav class="account__nav" aria-label="Zakładki panelu" id="accountTabs"></nav>
+        <nav class="account__nav" aria-label="Panel użytkownika">
+          <div class="account__tabs" aria-label="Zakładki panelu" id="accountTabs"></div>
+          <div class="account__navActions" aria-label="Akcje konta">
+            <button class="login account__logout" type="button" id="logoutBtn">Wyloguj się</button>
+            <p class="auth__muted" id="logoutMsg" aria-live="polite"></p>
+          </div>
+        </nav>
         <div class="card account__content" id="accountContent" aria-live="polite"></div>
-      </div>
-
-      <div class="account__actions auth__card">
-        <button class="login" type="button" id="logoutBtn">Wyloguj się</button>
-        <p class="auth__muted" id="logoutMsg" aria-live="polite"></p>
       </div>
     </section>
   </main>

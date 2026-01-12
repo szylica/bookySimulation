@@ -38,6 +38,7 @@ public class MainSiteController {
     @PostMapping("/get-availabilities")
     public ResponseEntity<List<AvailabilityDto>> getAvailabilitiesForDayForLocal(@RequestBody AvailabilityRequest availabilityRequest){
 
+
         var aaa = availabilityService.findAllAvailabilitiesForDay(
                 availabilityRequest.date(),
                 availabilityRequest.localDto()
@@ -49,8 +50,6 @@ public class MainSiteController {
 
     @PostMapping("/get-local-data")
     public ResponseEntity<LocalDto> getLocalData(@RequestBody Long id){
-        return ResponseEntity.ok().body(
-                localMapper.toDto(localService.findById(id))
-        );
+        return ResponseEntity.ok().body(localService.findById(id));
     }
 }
