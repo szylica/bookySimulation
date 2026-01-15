@@ -1073,6 +1073,43 @@ async function addProviderService(payload) {
     throw new Error(text || `HTTP ${res.status}`);
   }
 
+  // Expected response shape (example):
+  // { id: 2, name: "...", description: "...", price: 10.0, duration: 20 }
+  const created = await res.json().catch(() => null);
+
+  // Ensure id is present on returned object (needed later for delete by id).
+  if (!created || typeof created !== "object" || created.id == null) {
+    // keep the raw object for debugging, but signal missing identifier
+    return created;
+  }
+
+  return created;
+}
+
+async function deleteProviderService(serviceId) {
+  const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+  const url = `${apiBase}/api/user/delete-service`;
+
+  // Backend expects: { "id": <serviceId> }
+  const payload = { id: Number(serviceId) };
+
+  const res = await (apiFetch?.(url, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }) ?? fetch(url, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    credentials: "include",
+  }));
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  // backend may return empty body
   return res.json().catch(() => null);
 }
 
@@ -1173,16 +1210,19 @@ function renderProviderServices() {
 
     const cards = arr
       .map((s, idx) => {
-        const id = s?.id ?? s?.serviceId ?? null;
-        const name = s?.name ?? s?.serviceName ?? s?.title ?? `Usługa ${idx + 1}`;
-        const description = (s?.description ?? s?.desc ?? "").toString();
-        const duration = s?.duration ?? s?.durationInMinutes ?? s?.durationMinutes ?? s?.time ?? null;
-        const price = s?.price ?? s?.cost ?? null;
+        const id = s?.id ?? null;
+        const name = s?.name ?? `Usługa ${idx + 1}`;
+        const description = (s?.description ?? "").toString();
+        const duration = s?.duration ?? null;
+        const price = s?.price ?? null;
 
         const safeName = escapeHtml?.(String(name)) ?? String(name);
         const safeId = escapeHtml?.(String(id ?? "")) ?? String(id ?? "");
         const safeDesc = (escapeHtml?.(description) ?? description).trim();
         const meta = `${formatDuration(duration)} • ${formatPrice(price)}`;
+
+        const canDelete = Number.isFinite(Number(id)) && Number(id) > 0;
+
         return `
           <div class="account__serviceCard">
             <div class="account__serviceCardTop">
@@ -1193,12 +1233,53 @@ function renderProviderServices() {
               <div class="account__serviceId">#${safeId}</div>
             </div>
             ${safeDesc ? `<div class="account__serviceDesc">${safeDesc}</div>` : ""}
+            ${canDelete ? `
+              <button
+                type="button"
+                class="account__iconBtn"
+                data-action="delete-service"
+                data-id="${safeId}"
+                aria-label="Usuń usługę"
+                title="Usuń usługę"
+              >
+                <svg class="account__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/>
+                </svg>
+              </button>
+            ` : ""}
           </div>
         `;
       })
       .join("");
 
     listEl.innerHTML = `<div class="account__servicesGrid">${cards}</div>`;
+
+    // Bind delete handlers after render
+    for (const btn of listEl.querySelectorAll?.('button[data-action="delete-service"][data-id]') ?? []) {
+      btn.addEventListener("click", () => {
+        const sid = Number(btn.getAttribute("data-id"));
+        if (!Number.isFinite(sid) || sid <= 0) return;
+
+        const ok = window.confirm("Usunąć usługę? Tej operacji nie można cofnąć.");
+        if (!ok) return;
+
+        const prevDisabled = btn.disabled;
+        btn.disabled = true;
+
+        Promise.resolve()
+          .then(() => deleteProviderService(sid))
+          .then(() => {
+            if (msgEl) msgEl.textContent = "Usunięto usługę.";
+          })
+          .then(() => refresh())
+          .catch((err) => {
+            if (msgEl) msgEl.textContent = `Nie udało się usunąć usługi: ${err?.message ?? err}`;
+          })
+          .finally(() => {
+            btn.disabled = prevDisabled;
+          });
+      });
+    }
   };
 
   const refresh = () =>
@@ -1253,8 +1334,14 @@ function renderProviderServices() {
 
     Promise.resolve()
       .then(() => addProviderService({ name, description, duration, price }))
-      .then(() => {
-        if (addMsg) addMsg.textContent = "Dodano usługę.";
+      .then((created) => {
+        const id = created?.id;
+        if (id == null) {
+          if (addMsg) addMsg.textContent = "Dodano usługę, ale backend nie zwrócił ID.";
+        } else {
+          if (addMsg) addMsg.textContent = `Dodano usługę (#${id}).`;
+        }
+
         formEl?.reset?.();
         if (panelEl) panelEl.hidden = true;
       })

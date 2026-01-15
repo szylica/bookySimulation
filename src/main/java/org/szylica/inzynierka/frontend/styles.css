@@ -595,6 +595,24 @@ html[data-theme="dark"] .account__localBtn--active {
   border-radius: var(--radius-sm);
   background: var(--ring-weak);
   padding: 12px;
+  position: relative;
+  padding-bottom: 12px; /* nie wydłużamy karty w pionie */
+  padding-right: 12px; /* bez odsunięcia całej prawej krawędzi (ID ma być równo) */
+}
+
+/* Kosz w prawym dolnym rogu karty */
+.account__serviceCard .account__iconBtn[data-action="delete-service"] {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.account__serviceCardActions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .account__serviceCardTop {

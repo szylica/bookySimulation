@@ -52,7 +52,7 @@ public class LocalService {
         return localMapper.toShortDtoList(locals);
     }
 
-    public void addLocal(LocalDto localDto){
+    public LocalEntity addLocal(LocalDto localDto){
 
         LonAndLat lonAndLat = geoService.getLonAndLat(geoService.getCityData(localDto.getCity()));
 
@@ -79,6 +79,8 @@ public class LocalService {
         // dodać możliwość ustawiania przez użytkownika od kiedy lokal ma zacząć działac
         // usprawnic requesty do bazy danych, żeby nie wysyłało 1000 tylko 1 przy tworzeniu wielu obiektów
         availabilityService.setUpSlotsFirstTime(localEntity, LocalDate.now());
+
+        return localEntity;
     }
 
     public List<LocalEntity> findRandomLocals(){
@@ -111,6 +113,13 @@ public class LocalService {
 
     }
 
+    @Transactional
+    public void updateLocal(LocalDto localDto){
+         var localEntity = localMapper.toEntity(localDto);
+
+         localRepository.save(localEntity);
+
+    }
 
 
 }

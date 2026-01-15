@@ -70,10 +70,10 @@ public class UserController {
 
     @PostMapping("/add-local")
     @PreAuthorize("hasRole('PROVIDER')")
-    public ResponseEntity<Void> addLocal(@RequestBody LocalDto localDto){
-        localService.addLocal(localDto);
+    public ResponseEntity<LocalDto> addLocal(@RequestBody LocalDto localDto){
+        var localEntity = localService.addLocal(localDto);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(localMapper.toDto(localEntity));
     }
 
     @PostMapping("/info-local")
@@ -112,11 +112,18 @@ public class UserController {
 
     @PostMapping("/add-service")
     @PreAuthorize("hasRole('PROVIDER')")
-    public ResponseEntity<Void> addService(@RequestBody ServiceDto serviceDto){
+    public ResponseEntity<ServiceDto> addService(@RequestBody ServiceDto serviceDto){
         System.out.println("DTO: "+serviceDto);
         var entity = serviceMapper.toEntity(serviceDto);
         System.out.println("Entity: "+entity);
         serviceService.saveService(entity);
+        return ResponseEntity.ok().body(serviceMapper.toDto(entity));
+    }
+
+    @DeleteMapping("/delete-service")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<Void> deleteService(@RequestBody ServiceDto serviceDto){
+        serviceService.deleteService(serviceDto.getId());
         return ResponseEntity.ok().build();
     }
 
@@ -126,6 +133,16 @@ public class UserController {
         localService.setUpServicesForLocal(localAndServicesResponse.localId(), localAndServicesResponse.servicesIds());
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/change-local-settings")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<Void> changeLocalSettings(@RequestBody LocalDto localDto){
+        localService.updateLocal(localDto);
+        return ResponseEntity.ok().build();
+
+    }
+
+
 
     /*
 
