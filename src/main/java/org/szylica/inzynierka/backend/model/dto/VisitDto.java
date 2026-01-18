@@ -1,9 +1,6 @@
 package org.szylica.inzynierka.backend.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,13 +11,21 @@ import java.time.ZonedDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class VisitDto {
 
     private Long id;
 
-    private ZonedDateTime startTime;
+    private ZonedDateTime date;
+
+    private Long availabilityId;
+
     // Cena będzie kopiowana z usługi aby uniknąć zmian ceny wizyty gdyby cena usługi zmieniła się po umówieniu wizyty
+    // lub usługa została usunięta przez providera
     private Double price;
+    private String serviceName;
+    private String serviceDescription;
+    private Long duration;
 
     private Long localId;
     private Long serviceId;

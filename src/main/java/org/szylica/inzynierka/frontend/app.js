@@ -2,6 +2,7 @@ const mockVenues = Array.isArray(window.VENUES) ? window.VENUES : [];
 let mainLocals = [];
 
 let userLocation = null;
+let geoStatus = "unknown"; // unknown | granted | denied | unsupported
 
 const els = {
   searchInput: document.getElementById("searchInput"),
@@ -27,6 +28,41 @@ const {
 } =
   window.UIUtils ?? {};
 
+function storePrefetchedLocalData(localId, data) {
+  try {
+    const idNum = Number(localId);
+    if (!Number.isFinite(idNum)) return;
+    window.sessionStorage?.setItem(
+      `booking.prefetch.local.${idNum}`,
+      JSON.stringify({ localId: idNum, data })
+    );
+  } catch {
+    // ignore
+  }
+}
+
+async function prefetchLocalDataForBooking(localId) {
+  const idNum = Number(localId);
+  if (!Number.isFinite(idNum)) return null;
+
+  const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+  const url = `${apiBase}/api/main/get-local-data`;
+
+  const res = await (apiFetch?.(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: idNum }),
+  }) ?? fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: idNum }),
+    credentials: "include",
+  }));
+
+  if (!res.ok) return null;
+  return res.json().catch(() => null);
+}
+
 function showFlashIfPresent() {
   if (!els.flashNotice) return;
   try {
@@ -34,9 +70,30 @@ function showFlashIfPresent() {
     if (!msg) return;
     els.flashNotice.textContent = msg;
     els.flashNotice.hidden = false;
+    els.flashNotice.dataset.kind = "app";
     window.localStorage?.removeItem("ui.flash");
   } catch {
     // ignore
+  }
+}
+
+function showGeoFlashIfNeeded() {
+  if (!els.flashNotice) return;
+  // Do not override explicit app flash messages.
+  if (els.flashNotice.dataset.kind === "app" && !els.flashNotice.hidden) return;
+
+  const localsLoadedAndNonEmpty = Array.isArray(mainLocals) && mainLocals.length > 0;
+  const needsGeoHint = geoStatus === "denied" || geoStatus === "unsupported";
+
+  if (localsLoadedAndNonEmpty && needsGeoHint) {
+    els.flashNotice.textContent = "Aby zobaczyć lokale blisko ciebie, włącz lokalizację w przeglądarce.";
+    els.flashNotice.hidden = false;
+    els.flashNotice.dataset.kind = "geo";
+  } else if (els.flashNotice.dataset.kind === "geo") {
+    // Only hide geo hint if we were the one showing it.
+    els.flashNotice.hidden = true;
+    els.flashNotice.textContent = "";
+    delete els.flashNotice.dataset.kind;
   }
 }
 
@@ -113,6 +170,27 @@ function renderCard(venue) {
     </div>
   `;
 
+  // Requirement: when clicking a local card on home, call /api/main/get-local-data
+  // and show it on the booking page. We prefetch and pass via sessionStorage.
+  if (isLink) {
+    card.addEventListener("click", async (e) => {
+      const localId = Number(venue?.id);
+      if (!Number.isFinite(localId)) return; // fallback to normal navigation
+      if (!card.href) return;
+
+      e.preventDefault?.();
+
+      try {
+        const data = await prefetchLocalDataForBooking(localId);
+        if (data) storePrefetchedLocalData(localId, data);
+      } catch {
+        // ignore prefetch errors, still navigate
+      }
+
+      window.location.href = card.href;
+    });
+  }
+
   return card;
 }
 
@@ -160,14 +238,11 @@ function renderRecommended(query) {
 
 function renderNearby(query) {
   if (!els.nearbySection || !els.nearbyGrid) return;
-  if (mainLocals.length === 0) {
+  // Requirement: if user denied location OR backend returned an empty locals list,
+  // do not display the "Lokale blisko ciebie" segment at all.
+  if (mainLocals.length === 0 || !userLocation) {
     els.nearbyGrid.replaceChildren();
-    els.nearbySection.hidden = false;
-    return;
-  }
-  if (!userLocation) {
-    els.nearbyGrid.replaceChildren();
-    els.nearbySection.hidden = false;
+    els.nearbySection.hidden = true;
     return;
   }
 
@@ -188,6 +263,7 @@ function renderAll() {
   const query = els.searchInput?.value ?? "";
   renderNearby(query);
   renderRecommended(query);
+  showGeoFlashIfNeeded();
 }
 
 function getMockMetaByIndex(idx) {
@@ -314,10 +390,16 @@ async function loadMainLocals() {
 
 function initGeolocation() {
   if (!els.nearbySection || !els.nearbyGrid) return;
-  if (!("geolocation" in navigator)) return;
+  if (!("geolocation" in navigator)) {
+    geoStatus = "unsupported";
+    userLocation = null;
+    renderAll();
+    return;
+  }
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
+      geoStatus = "granted";
       userLocation = {
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
@@ -326,6 +408,7 @@ function initGeolocation() {
     },
     () => {
       // User denied / unavailable — keep the section hidden.
+      geoStatus = "denied";
       userLocation = null;
       renderAll();
     },

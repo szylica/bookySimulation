@@ -15,9 +15,6 @@ public class VisitService {
     private final VisitRepository visitRepository;
 
     public void saveVisit(VisitEntity visitEntity){
-
-
-
         visitRepository.save(visitEntity);
     }
 

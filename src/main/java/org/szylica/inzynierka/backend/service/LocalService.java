@@ -97,8 +97,20 @@ public class LocalService {
         var userEntity = userRepository.findById(workerId).orElseThrow();
         var localEntity = localRepository.findById(localId).orElseThrow();
 
-        localEntity.addWorker(userEntity);
-        localRepository.save(localEntity);
+        if(userEntity.getRole().name().equals("ROLE_WORKER")){
+            localEntity.addWorker(userEntity);
+            localRepository.save(localEntity);
+        }
+    }
+
+    public List<UserEntity> findAllWorkersForLocal(Long localId){
+        var localEntity = localRepository.findById(localId).orElseThrow();
+        return localRepository.findAllByWorkers_Id(localEntity);
+    }
+
+    public List<ServiceEntity> findAllServicesForLocal(Long localId){
+        var localEntity = localRepository.findById(localId).orElseThrow();
+        return localRepository.findAllByServices_Id(localEntity);
     }
 
     @Transactional
@@ -110,7 +122,6 @@ public class LocalService {
 
         localEntity.addAllServices(serviceEntities);
         localRepository.save(localEntity);
-
     }
 
     @Transactional

@@ -10,11 +10,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {LocalMapper.class, UserMapper.class})
 public interface ServiceMapper {
 
-    @Mapping(target = "duration", expression = "java(java.time.Duration.ofMinutes(dto.getDuration()))")
-    ServiceEntity toEntity(ServiceDto dto);
+    @Mapping(target = "duration", expression = "java(java.time.Duration.ofMinutes(serviceDto.getDuration()))")
+    ServiceEntity toEntity(ServiceDto serviceDto);
 
-    @Mapping(target = "duration", expression = "java(dto.getDuration().toMinutes())")
-    ServiceDto toDto(ServiceEntity dto);
+    @Mapping(target = "duration", expression = "java(serviceEntity.getDuration().toMinutes())")
+    ServiceDto toDto(ServiceEntity serviceEntity);
 
     List<ServiceDto> toDtoList(List<ServiceEntity> serviceEntityList);
 

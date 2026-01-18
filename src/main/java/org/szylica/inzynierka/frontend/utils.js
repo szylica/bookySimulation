@@ -9,6 +9,7 @@
 
   const THEME_KEY = "ui.theme";
   const FLASH_KEY = "ui.flash";
+  const TOAST_KEY = "ui.toast";
   const AUTH_KEY = "auth.loggedIn";
   const AUTH_ROLE_KEY = "auth.role";
 
@@ -22,6 +23,89 @@
     } catch {
       // ignore
     }
+  }
+
+  function setToastMessage(message, kind) {
+    try {
+      if (!message) {
+        window.localStorage?.removeItem(TOAST_KEY);
+        return;
+      }
+
+      const payload = {
+        message: String(message),
+        kind: (kind ?? "success").toString(),
+        ts: Date.now(),
+      };
+
+      window.localStorage?.setItem(TOAST_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+  }
+
+  function takeToastMessage() {
+    try {
+      const raw = window.localStorage?.getItem(TOAST_KEY);
+      if (!raw) return null;
+      window.localStorage?.removeItem(TOAST_KEY);
+      const parsed = JSON.parse(raw);
+      const message = (parsed?.message ?? "").toString();
+      if (!message.trim()) return null;
+      return {
+        message,
+        kind: (parsed?.kind ?? "success").toString(),
+      };
+    } catch {
+      try {
+        window.localStorage?.removeItem(TOAST_KEY);
+      } catch {
+        // ignore
+      }
+      return null;
+    }
+  }
+
+  function showToast(message, kind, options) {
+    const text = (message ?? "").toString().trim();
+    if (!text) return;
+
+    const durationMs = Number(options?.durationMs ?? 5000);
+    const duration = Number.isFinite(durationMs) ? Math.max(1500, durationMs) : 5000;
+    const toastKind = (kind ?? "success").toString();
+
+    const el = document.createElement("div");
+    el.className = `toast toast--${toastKind}`;
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.textContent = text;
+
+    document.body.appendChild(el);
+
+    // Trigger CSS transition.
+    requestAnimationFrame(() => {
+      el.classList.add("toast--show");
+    });
+
+    const close = () => {
+      el.classList.remove("toast--show");
+      el.classList.add("toast--hide");
+      window.setTimeout(() => {
+        el.remove();
+      }, 250);
+    };
+
+    const timer = window.setTimeout(close, duration);
+    el.addEventListener("click", () => {
+      window.clearTimeout(timer);
+      close();
+    });
+  }
+
+  function showToastFromStorage() {
+    const toast = takeToastMessage();
+    if (!toast) return;
+    showToast(toast.message, toast.kind);
   }
 
   function getCookieValue(name) {
@@ -285,5 +369,25 @@
     apiFetch,
     handleSessionExpired,
     logout,
+    setFlashMessage,
+    setToastMessage,
+    showToast,
+    showToastFromStorage,
   };
+
+  // Automatically show any pending toast on each page load.
+  // This makes cross-page redirects (e.g. booking -> account) reliable.
+  const autoToast = () => {
+    try {
+      showToastFromStorage();
+    } catch {
+      // ignore
+    }
+  };
+
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", autoToast, { once: true });
+  } else {
+    autoToast();
+  }
 })();

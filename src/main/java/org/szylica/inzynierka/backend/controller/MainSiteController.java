@@ -6,10 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import org.szylica.inzynierka.backend.mapper.AvailabilityMapper;
 import org.szylica.inzynierka.backend.mapper.LocalMapper;
 
-import org.szylica.inzynierka.backend.model.dto.AvailabilityDto;
-import org.szylica.inzynierka.backend.model.dto.AvailabilityRequest;
-import org.szylica.inzynierka.backend.model.dto.LocalDto;
-import org.szylica.inzynierka.backend.model.dto.MainSiteLocalCard;
+import org.szylica.inzynierka.backend.mapper.ServiceMapper;
+import org.szylica.inzynierka.backend.mapper.UserMapper;
+import org.szylica.inzynierka.backend.model.dto.*;
 import org.szylica.inzynierka.backend.service.AvailabilityService;
 import org.szylica.inzynierka.backend.service.LocalService;
 
@@ -25,6 +24,8 @@ public class MainSiteController {
     private final LocalMapper localMapper;
     private final AvailabilityService availabilityService;
     private final AvailabilityMapper availabilityMapper;
+    private final UserMapper userMapper;
+    private final ServiceMapper serviceMapper;
 
     @GetMapping("/get-locals")
     public ResponseEntity<List<MainSiteLocalCard>> getLocals(){
@@ -49,7 +50,18 @@ public class MainSiteController {
     }
 
     @PostMapping("/get-local-data")
-    public ResponseEntity<LocalDto> getLocalData(@RequestBody Long id){
-        return ResponseEntity.ok().body(localService.findById(id));
+    public ResponseEntity<LocalDto> getLocalData(@RequestBody LocalShortDto localDto){
+        return ResponseEntity.ok().body(localService.findById(localDto.getId()));
+    }
+
+    @PostMapping("/get-full-local-data")
+    public ResponseEntity<FullVisitDataDto> getFullLocalData(@RequestBody LocalShortDto localDto){
+
+        return ResponseEntity.ok().body(new FullVisitDataDto(
+                userMapper.toDtoList(localService.findAllWorkersForLocal(localDto.getId())),
+                serviceMapper.toDtoList(localService.findAllServicesForLocal(localDto.getId())),
+                localService.findById(localDto.getId())
+        ));
+
     }
 }

@@ -69,6 +69,12 @@ public class AvailabilityService {
         }
     }
 
+    public void changeAvailabilityStatus(Long availabilityId, boolean isTaken){
+        var availabilityEntity = availabilityRepository.findById(availabilityId).orElseThrow();
+        availabilityEntity.setTaken(isTaken);
+        availabilityRepository.save(availabilityEntity);
+    }
+
     public List<AvailabilityDto> findAllAvailabilitiesForLocal(LocalEntity localEntity){
         var entities = availabilityRepository.findByLocal(localEntity);
         return availabilityMapper.toDtoList(entities);

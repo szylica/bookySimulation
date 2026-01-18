@@ -20,11 +20,75 @@ const {
   setAuthRole,
   apiFetch,
   logout,
+  showToastFromStorage,
 } = window.UIUtils ?? {};
 
 setCurrentYear?.(els.year);
 attachThemeToggle?.(els.themeToggle);
 attachLoginAlert?.(els.loginBtn);
+
+function showLocalToast(message, kind) {
+  const text = (message ?? "").toString().trim();
+  if (!text) return;
+
+  const toastKind = (kind ?? "success").toString();
+  const el = document.createElement("div");
+  el.className = `toast toast--${toastKind}`;
+  el.setAttribute("role", "status");
+  el.setAttribute("aria-live", "polite");
+  el.textContent = text;
+  document.body.appendChild(el);
+
+  requestAnimationFrame(() => el.classList.add("toast--show"));
+
+  const close = () => {
+    el.classList.remove("toast--show");
+    el.classList.add("toast--hide");
+    window.setTimeout(() => el.remove(), 250);
+  };
+
+  const t = window.setTimeout(close, 5000);
+  el.addEventListener("click", () => {
+    window.clearTimeout(t);
+    close();
+  });
+}
+
+function showToastFromStorageFallback() {
+  // Prefer new toast payload.
+  try {
+    const raw = window.localStorage?.getItem("ui.toast");
+    if (raw) {
+      window.localStorage?.removeItem("ui.toast");
+      const parsed = JSON.parse(raw);
+      const msg = (parsed?.message ?? "").toString();
+      const kind = (parsed?.kind ?? "success").toString();
+      if (msg.trim()) {
+        showLocalToast(msg, kind);
+        return;
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  // Backward-compatible: treat ui.flash as a success toast.
+  try {
+    const msg = window.localStorage?.getItem("ui.flash");
+    if (!msg) return;
+    window.localStorage?.removeItem("ui.flash");
+    if (String(msg).trim()) showLocalToast(String(msg), "success");
+  } catch {
+    // ignore
+  }
+}
+
+// Optional success popup (e.g. after booking redirect)
+if (typeof showToastFromStorage === "function") {
+  showToastFromStorage();
+} else {
+  showToastFromStorageFallback();
+}
 
 if (!isLoggedIn?.()) {
   window.location.href = "./login.html";

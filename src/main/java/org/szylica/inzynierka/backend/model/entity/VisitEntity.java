@@ -1,11 +1,12 @@
 package org.szylica.inzynierka.backend.model.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.context.annotation.PropertySource;
+import org.szylica.inzynierka.backend.model.converter.DurationMinutesConverter;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -14,6 +15,9 @@ import java.time.ZonedDateTime;
 @Table(name = "visits")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class VisitEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +26,14 @@ public class VisitEntity {
     private ZonedDateTime date;
     // Cena będzie kopiowana z usługi aby uniknąć zmian ceny wizyty gdyby cena usługi zmieniła się po umówieniu wizyty
     private Double price;
+
+    private String serviceName;
+    private String serviceDescription;
+
+    @Convert(converter = DurationMinutesConverter.class)
+    private Duration duration;
+
+    private boolean isCanceled;
 
 
     @ManyToOne

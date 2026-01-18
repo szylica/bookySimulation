@@ -9,10 +9,10 @@ import java.time.ZonedDateTime;
 @Entity
 @Table(name = "availabilities")
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class AvailabilityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

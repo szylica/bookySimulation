@@ -75,16 +75,11 @@
 
           <label class="form__label" for="employeeSelect">Pracownik</label>
           <select class="form__control" id="employeeSelect" required></select>
+          <p class="form__note account__hint" id="employeeEmptyHint" hidden>Na ten moment brak dostępnych pracowników</p>
 
           <label class="form__label" for="serviceSelect">Usługa</label>
-          <select class="form__control" id="serviceSelect" required>
-            <option value="">Wybierz usługę</option>
-            <option>Strzyżenie</option>
-            <option>Strzyżenie + broda</option>
-            <option>Koloryzacja</option>
-            <option>Masaż</option>
-            <option>Zabieg kosmetyczny</option>
-          </select>
+          <select class="form__control" id="serviceSelect" required></select>
+          <p class="form__note account__hint" id="serviceEmptyHint" hidden>Ten lokal nie oferuje jeszcze żadnych usług</p>
 
           <button class="primary" type="submit">Umów się</button>
           <p class="form__note">To jest symulacja — kliknięcie pokaże potwierdzenie w okienku.</p>
