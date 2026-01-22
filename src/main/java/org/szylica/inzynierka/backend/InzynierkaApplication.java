@@ -27,4 +27,15 @@ public class InzynierkaApplication {
 
     //TODO
     // Globalna obsługa wyjątków z ExceptionHandler
+
+    //TODO
+    // gdy pracownik jest zwalniany, to wszystkie jego wizyty powinny być anulowane
+
+    //TODO
+    // Dodanie wizyt do kalendarza
+
+    //TODO
+    // konkretni pracownicy powinni mieć przypisywane konkretne usługi które mogą wykonywać
+
+
 }
