@@ -33,19 +33,13 @@ public class VisitController {
     @PostMapping("/set-up-visit")
     public ResponseEntity<Void> setUpVisit(@RequestBody VisitDto visitDto){
 
-        System.out.println("VISIT DTO"+visitDto);
         visitDto.setCustomerId(SecurityUtils.getCurrentUserId());
 
         var visitEntity = visitMapper.toEntity(visitDto);
 
-        System.out.println("VISIT ENTITY"+visitEntity);
-        visitService.saveVisit(visitEntity);
-
-        availabilityService.changeAvailabilityStatus(visitDto.getAvailabilityId(), true);
-
+        visitService.saveVisit(visitEntity, visitDto.getAvailabilityId(), true);
 
         return ResponseEntity.ok().build();
-
     }
 
 

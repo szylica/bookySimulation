@@ -1,5 +1,6 @@
 package org.szylica.inzynierka.backend.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.szylica.inzynierka.backend.model.entity.UserEntity;
@@ -13,16 +14,24 @@ import java.util.List;
 public class VisitService {
 
     private final VisitRepository visitRepository;
+    private final AvailabilityService availabilityService;
 
-    public void saveVisit(VisitEntity visitEntity){
+    @Transactional
+    public void saveVisit(VisitEntity visitEntity, Long availabilityId, boolean availabilityStatus){
         visitRepository.save(visitEntity);
+        availabilityService.changeAvailabilityStatus(availabilityId, availabilityStatus);
     }
 
     public void deleteVisit(Long visitId){
         visitRepository.deleteById(visitId);
     }
 
-    public List<VisitEntity> getUserVisits(Long userId){
-        return visitRepository.findAllByCustomerId(userId);
+    public List<VisitEntity> getCustomerVisits(Long userId){
+        return visitRepository.findAllByCustomerIdOrderByDate(userId);
     }
+
+    public List<VisitEntity> getWorkerVisits(Long userId){
+        return visitRepository.findAllByWorkerIdOrderByDate(userId);
+    }
+
 }

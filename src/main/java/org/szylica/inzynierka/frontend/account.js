@@ -439,6 +439,23 @@ const TABS_BY_ROLE = {
 
 const tabs = TABS_BY_ROLE[role] ?? TABS_BY_ROLE.ROLE_CUSTOMER;
 
+async function fetchMyVisits() {
+  const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+  const url = `${apiBase}/api/user/my-reservations`;
+
+  const res =
+    (await apiFetch?.(url, { method: "GET", headers: { Accept: "application/json" } })) ??
+    (await fetch(url, { method: "GET", headers: { Accept: "application/json" }, credentials: "include" }));
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json().catch(() => null);
+  return Array.isArray(data) ? data : [];
+}
+
 async function fetchMyLocals() {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
   const url = `${apiBase}/api/user/my-locals`;
@@ -1549,6 +1566,240 @@ function renderCustomerAccountSettings() {
   });
 }
 
+function renderCustomerBookings() {
+  if (!els.content) return;
+
+  const title = document.createElement("h2");
+  title.className = "form__title";
+  title.textContent = "Moje wizyty";
+
+  const note = document.createElement("p");
+  note.className = "form__note";
+  note.textContent = "Ładowanie wizyt…";
+
+  const list = document.createElement("div");
+  list.className = "visitSections";
+  list.setAttribute("aria-busy", "true");
+
+  els.content.replaceChildren(title, note, list);
+
+  const stripZoneIdSuffix = (value) => {
+    const s = (value ?? "").toString().trim();
+    if (!s) return "";
+    const idx = s.indexOf("[");
+    return idx > 0 ? s.slice(0, idx) : s;
+  };
+
+  const parseVisitDate = (visit) => {
+    const raw =
+      visit?.date ??
+      visit?.startTime ??
+      visit?.visitTime ??
+      visit?.time ??
+      visit?.startDate ??
+      null;
+
+    if (!raw) return null;
+    const normalized = stripZoneIdSuffix(raw);
+    const d = new Date(normalized);
+    if (Number.isNaN(d.getTime())) return null;
+    return d;
+  };
+
+  const formatDateTime = (dateObj) => {
+    if (!dateObj) return "—";
+    try {
+      return dateObj.toLocaleString("pl-PL", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+    } catch {
+      return dateObj.toString();
+    }
+  };
+
+  const formatPrice = (value) => {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return "—";
+    try {
+      return `${num.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
+    } catch {
+      return `${num.toFixed(2)} zł`;
+    }
+  };
+
+  const formatDuration = (value) => {
+    if (value == null) return "—";
+    const num = Number(value);
+    if (!Number.isFinite(num) || num <= 0) return "—";
+    if (num >= 1_000_000_000) {
+      const seconds = num / 1_000_000_000;
+      if (seconds < 60) return `${Math.round(seconds)} s`;
+      const minutes = seconds / 60;
+      if (minutes < 120) return `${Math.round(minutes)} min`;
+      const hours = minutes / 60;
+      return `${hours.toFixed(1)} h`;
+    }
+    return `${Math.round(num)} min`;
+  };
+
+  const renderVisitCard = (visit, idx, options) => {
+    const d = options?.date ?? parseVisitDate(visit);
+    const isPast = typeof options?.isPast === "boolean" ? options.isPast : (d ? d.getTime() < Date.now() : false);
+
+    const localName = visit?.localName ?? visit?.local?.name ?? visit?.local ?? "";
+    const serviceName = visit?.serviceName ?? visit?.service?.name ?? visit?.service ?? "";
+    const workerName =
+      visit?.workerName ??
+      visit?.employeeName ??
+      visit?.worker?.name ??
+      visit?.employee?.name ??
+      "";
+
+    const safeTitle = escapeHtml?.(String(serviceName || localName || `Wizyta ${idx + 1}`)) ??
+      String(serviceName || localName || `Wizyta ${idx + 1}`);
+    const safeSubtitle = escapeHtml?.(String(localName || "")) ?? String(localName || "");
+    const safeWorker = escapeHtml?.(String(workerName || "—")) ?? String(workerName || "—");
+
+    const card = document.createElement("div");
+    card.className = `card visitCard${isPast ? " visitCard--past" : ""}`;
+
+    const badgeLabel = isPast ? "Minęła" : "Nadchodząca";
+    const badgeClass = isPast ? "badge badge--muted" : "badge";
+
+    card.innerHTML = `
+      <div class="card__top">
+        <div>
+          <h3 class="card__name">${safeTitle}</h3>
+          <p class="card__category">${safeSubtitle || "—"}</p>
+        </div>
+        <span class="${badgeClass}">
+          <span class="badge__dot" aria-hidden="true"></span>
+          <span>${escapeHtml?.(badgeLabel) ?? badgeLabel}</span>
+        </span>
+      </div>
+
+      <div class="card__meta">
+        <div class="card__row">
+          <span class="card__label">Data</span>
+          <span class="card__value">${escapeHtml?.(formatDateTime(d)) ?? formatDateTime(d)}</span>
+        </div>
+        <div class="card__row">
+          <span class="card__label">Pracownik</span>
+          <span class="card__value">${safeWorker}</span>
+        </div>
+        <div class="card__row">
+          <span class="card__label">Cena</span>
+          <span class="card__value">${escapeHtml?.(formatPrice(visit?.price)) ?? formatPrice(visit?.price)}</span>
+        </div>
+        <div class="card__row">
+          <span class="card__label">Czas trwania</span>
+          <span class="card__value">${escapeHtml?.(formatDuration(visit?.duration)) ?? formatDuration(visit?.duration)}</span>
+        </div>
+      </div>
+
+      <div class="visitCard__actions">
+        <button class="primary visitCard__cancel" type="button" ${isPast ? "disabled" : ""}>Anuluj</button>
+      </div>
+    `;
+
+    return card;
+  };
+
+  Promise.resolve()
+    .then(() => fetchMyVisits())
+    .then((visits) => {
+      list.setAttribute("aria-busy", "false");
+
+      const arr = Array.isArray(visits) ? visits : [];
+      if (arr.length === 0) {
+        note.textContent = "Nie masz jeszcze żadnych wizyt.";
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.innerHTML = `
+          <h3 class="empty__title">Brak wizyt</h3>
+          <p class="empty__desc">Gdy umówisz wizytę, zobaczysz ją tutaj.</p>
+        `;
+        list.replaceChildren(empty);
+        return;
+      }
+
+      const now = Date.now();
+      const past = [];
+      const upcoming = [];
+
+      for (const v of arr) {
+        const d = parseVisitDate(v);
+        const isPast = d ? d.getTime() < now : false;
+        (isPast ? past : upcoming).push({ visit: v, date: d, isPast });
+      }
+
+      // Upcoming should be ordered from the nearest date to the farthest.
+      // For missing/unparseable dates, keep them at the end.
+      upcoming.sort((a, b) => {
+        const ta = a.date ? a.date.getTime() : Number.POSITIVE_INFINITY;
+        const tb = b.date ? b.date.getTime() : Number.POSITIVE_INFINITY;
+        if (ta !== tb) return ta - tb;
+        return 0;
+      });
+
+      const makeSection = (titleText, items, emptyText) => {
+        const section = document.createElement("section");
+        section.className = "visitSection";
+
+        const head = document.createElement("div");
+        head.className = "visitSection__head";
+
+        const titleEl = document.createElement("h3");
+        titleEl.className = "visitSection__title";
+        titleEl.textContent = titleText;
+
+        const countEl = document.createElement("span");
+        countEl.className = "visitSection__count";
+        countEl.textContent = String(items.length);
+
+        head.append(titleEl, countEl);
+
+        const grid = document.createElement("div");
+        grid.className = "visitList";
+
+        if (items.length === 0) {
+          const info = document.createElement("p");
+          info.className = "form__note visitSection__note";
+          info.textContent = emptyText;
+          section.append(head, info);
+          return section;
+        }
+
+        grid.replaceChildren(
+          ...items.map((it, i) => renderVisitCard(it.visit, i, { date: it.date, isPast: it.isPast }))
+        );
+
+        section.append(head, grid);
+        return section;
+      };
+
+      note.textContent = "";
+      list.replaceChildren(
+        makeSection(
+          "Nadchodzące wizyty",
+          upcoming,
+          "Nie masz żadnych nadchodzących wizyt."
+        ),
+        makeSection(
+          "Wizyty, które już minęły",
+          past,
+          "Nie masz jeszcze żadnych wizyt w przeszłości."
+        )
+      );
+    })
+    .catch((err) => {
+      list.setAttribute("aria-busy", "false");
+      note.textContent = `Nie udało się pobrać wizyt: ${err?.message ?? err}`;
+      list.replaceChildren();
+    });
+}
+
 function renderContent(tabId) {
   const tab = tabs.find((t) => t.id === tabId) ?? tabs[0];
   if (els.subtitle) els.subtitle.textContent = tab.label;
@@ -1569,6 +1820,18 @@ function renderContent(tabId) {
 
   if (tab.id === "account" && role === "ROLE_CUSTOMER") {
     renderCustomerAccountSettings();
+
+    for (const btn of els.tabs?.querySelectorAll?.("button[data-tab]") ?? []) {
+      btn.setAttribute(
+        "aria-current",
+        btn.getAttribute("data-tab") === tab.id ? "page" : "false"
+      );
+    }
+    return;
+  }
+
+  if (tab.id === "bookings" && role === "ROLE_CUSTOMER") {
+    renderCustomerBookings();
 
     for (const btn of els.tabs?.querySelectorAll?.("button[data-tab]") ?? []) {
       btn.setAttribute(

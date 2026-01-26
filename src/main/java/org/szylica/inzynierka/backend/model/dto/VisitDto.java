@@ -32,5 +32,7 @@ public class VisitDto {
     private Long workerId;
     private Long customerId;
 
-
+    private UserDto worker;
+    private UserDto customer;
+    private LocalShortDto local;
 }

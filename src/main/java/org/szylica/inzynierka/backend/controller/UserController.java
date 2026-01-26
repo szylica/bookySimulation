@@ -46,7 +46,7 @@ public class UserController {
 
     @GetMapping("/my-reservations")
     public ResponseEntity<List<VisitDto>> myReservations(){
-        var visits = visitService.getUserVisits(SecurityUtils.getCurrentUserId());
+        var visits = visitService.getCustomerVisits(SecurityUtils.getCurrentUserId());
         return ResponseEntity.ok().body(visitMapper.toDtoList(visits));
     }
 
@@ -156,4 +156,10 @@ public class UserController {
         return ResponseEntity.ok().body(SecurityUtils.getCurrentUserId());
     }
 
+    @GetMapping("/get-worker-visits")
+    @PreAuthorize("hasRole('WORKER')")
+    public ResponseEntity<List<VisitDto>> getWorkerVisits(){
+        var workerVisits = visitService.getWorkerVisits(SecurityUtils.getCurrentUserId());
+        return ResponseEntity.ok().body(visitMapper.toDtoList(workerVisits));
+    }
 }

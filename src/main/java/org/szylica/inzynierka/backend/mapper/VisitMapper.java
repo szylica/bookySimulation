@@ -31,6 +31,7 @@ public abstract class VisitMapper {
     @Mapping(source = "worker.id", target = "workerId")
     @Mapping(source = "customer.id", target = "customerId")
     @Mapping(target = "duration", expression = "java(visitEntity.getDuration().toMinutes())")
+    @Mapping(target = "local.serviceProvider", ignore = true)
     public abstract VisitDto toDto(VisitEntity visitEntity);
 
     //@Mapping(target = "duration", expression = "java(java.time.Duration.ofMinutes(visitDto.getDuration()))")

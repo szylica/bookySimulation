@@ -266,6 +266,75 @@ body {
   margin-top: 10px;
 }
 
+.visitList {
+  margin-top: 14px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start;
+}
+
+.visitSections {
+  margin-top: 14px;
+  display: block;
+}
+
+.visitSection + .visitSection {
+  margin-top: 18px;
+}
+
+.visitSection__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.visitSection__title {
+  margin: 0;
+  font-size: 1.02rem;
+  letter-spacing: -0.01em;
+}
+
+.visitSection__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--ring-weak);
+  color: var(--text);
+  font-weight: 750;
+}
+
+.visitSection__note {
+  margin-top: 8px;
+}
+
+.visitCard__actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.visitCard__cancel.primary {
+  width: auto;
+  margin-top: 0;
+  padding: 10px 12px;
+}
+
+.visitCard--past {
+  opacity: 0.62;
+  filter: grayscale(0.08);
+}
+
+.badge.badge--muted {
+  opacity: 0.75;
+}
+
 @media (max-width: 860px) {
   .account {
     grid-template-columns: 1fr;
