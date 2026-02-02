@@ -1,5 +1,6 @@
 package org.szylica.inzynierka.backend.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -126,10 +127,13 @@ public class LocalService {
 
     @Transactional
     public void updateLocal(LocalDto localDto){
-         var localEntity = localMapper.toEntity(localDto);
 
-         localRepository.save(localEntity);
+        LocalEntity existingLocal = localRepository.findById(localDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Lokal nie istnieje"));
 
+        localMapper.updateEntityFromDto(localDto, existingLocal);
+
+        localRepository.save(existingLocal);
     }
 
 

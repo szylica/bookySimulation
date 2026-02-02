@@ -14,6 +14,7 @@ const els = {
   venueMeta: document.getElementById("venueMeta"),
   venueRating: document.getElementById("venueRating"),
   venueAddress: document.getElementById("venueAddress"),
+  venuePhone: document.getElementById("venuePhone"),
 
   dateInput: document.getElementById("dateInput"),
   timesSubtitle: document.getElementById("timesSubtitle"),
@@ -432,6 +433,9 @@ function renderVenue(venue) {
   els.venueMeta.textContent = `${venue.category} • ${venue.city}`;
   els.venueRating.textContent = `${venue.rating.toFixed(1)} (${venue.reviews})`;
   els.venueAddress.textContent = venue.address;
+
+  const phone = (venue.phone ?? "").toString().trim();
+  if (els.venuePhone) els.venuePhone.textContent = phone || "—";
 
   applyEmployeesToSelect(Array.isArray(venue.employees) ? venue.employees : []);
   applyServicesToSelect(Array.isArray(venue.services) ? venue.services : []);

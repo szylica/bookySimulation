@@ -1,7 +1,6 @@
 package org.szylica.inzynierka.backend.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import org.szylica.inzynierka.backend.model.dto.LocalDto;
 import org.szylica.inzynierka.backend.model.dto.LocalShortDto;
 import org.szylica.inzynierka.backend.model.entity.LocalEntity;
@@ -15,6 +14,7 @@ public interface LocalMapper {
     LocalDto toDto(LocalEntity localEntity);
 
     @Mapping(target = "serviceProvider", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     LocalEntity toEntity(LocalDto localDto);
 
     //@Mapping(source = "serviceProvider.id", target = "serviceProvider")
@@ -26,5 +26,8 @@ public interface LocalMapper {
 
     List<LocalShortDto> toShortDtoList(List<LocalEntity> localEntityList);
 
+    @Mapping(target = "serviceProvider", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(LocalDto dto, @MappingTarget LocalEntity entity);
 
 }

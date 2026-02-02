@@ -1,4 +1,4 @@
-# Frontend (symulacja Booksy)
+# Frontend (symulacja BookMe)
 
 To jest statyczny frontend (HTML/CSS/JS) bez backendu.
 

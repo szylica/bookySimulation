@@ -58,6 +58,119 @@ body {
   overflow-x: hidden;
 }
 
+/* Modal */
+body.modalOpen {
+  overflow: hidden;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 17, 22, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 28px;
+}
+
+.modalOverlay[hidden] {
+  display: none;
+}
+
+.modal {
+  width: min(760px, 96vw);
+  max-height: min(82vh, 860px);
+  overflow: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  transform: translateY(-14px);
+}
+
+.modal__head {
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal__title {
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  min-width: 0;
+}
+
+.modal__close {
+  border: 1px solid var(--border);
+  background: var(--ring-weak);
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.modal__close:hover {
+  box-shadow: var(--shadow);
+}
+
+.modal__close:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring-strong);
+}
+
+.modal__body {
+  padding: 18px 20px 22px;
+}
+
+.modal__grid {
+  display: grid;
+  gap: 10px;
+}
+
+.modal__row {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.modal__label {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.modal__value {
+  color: var(--text);
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.modal__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+@media (max-width: 560px) {
+  .modal__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -105,7 +218,7 @@ body {
   box-shadow: 0 0 0 4px var(--ring-weak);
 }
 
-.brand__text {
+.brand__name {
   font-weight: 750;
   letter-spacing: -0.02em;
 }
@@ -126,7 +239,6 @@ body {
   padding: 12px 14px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  outline: none;
   background: var(--surface);
   box-shadow: 0 1px 0 rgba(20, 21, 26, 0.03);
 }
@@ -140,8 +252,8 @@ body {
   justify-self: end;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 10px;
+  min-width: 0;
 }
 
 .theme {
@@ -151,6 +263,15 @@ body {
   padding: 10px 14px;
   font-weight: 650;
   cursor: pointer;
+}
+
+.theme--icon {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .theme:hover {
@@ -195,7 +316,6 @@ body {
   outline: none;
   box-shadow: 0 0 0 4px var(--ring);
 }
-
 .account {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
@@ -314,6 +434,153 @@ body {
   margin-top: 8px;
 }
 
+/* Grafik pracownika (ROLE_WORKER -> schedule) */
+.schedule__toolbar {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.schedule__week {
+  font-weight: 750;
+  color: var(--text);
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--ring-weak);
+  white-space: nowrap;
+}
+
+.schedule__navBtn {
+  width: auto;
+  white-space: nowrap;
+}
+
+/* Wrapper keeps horizontal scrollbar at the top */
+.scheduleScroller {
+  margin-top: 12px;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 6px;
+  transform: rotateX(180deg);
+}
+
+.scheduleGrid {
+  transform: rotateX(180deg);
+  display: grid;
+  grid-template-columns: repeat(7, minmax(220px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+  min-height: 520px;
+}
+
+.scheduleDay {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.scheduleDay__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.scheduleDay__title {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.scheduleDay__date {
+  color: var(--muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.scheduleDay__list {
+  display: grid;
+  gap: 10px;
+  flex: 1;
+  align-content: start;
+}
+
+.scheduleVisit {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--ring-weak);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.scheduleVisit--clickable {
+  cursor: pointer;
+}
+
+.scheduleVisit--clickable:hover {
+  box-shadow: var(--shadow);
+}
+
+.scheduleVisit--clickable:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring-strong);
+}
+
+.scheduleVisit--empty {
+  grid-template-columns: 1fr;
+  color: var(--muted);
+  text-align: center;
+}
+
+.scheduleVisit__time {
+  font-weight: 850;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.scheduleVisit__main {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.scheduleVisit__title {
+  font-weight: 800;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.scheduleVisit__meta {
+  color: var(--muted);
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+@media (max-width: 720px) {
+  .scheduleGrid {
+    grid-template-columns: repeat(7, minmax(170px, 1fr));
+  }
+}
+
 .visitCard__actions {
   margin-top: 12px;
   display: flex;
@@ -427,6 +694,26 @@ body {
 #venuesGrid {
   align-content: start;
   align-items: start;
+}
+
+/* Home page grids: keep a compact "grid" layout (3/2/1 columns) */
+#nearbyGrid,
+#venuesGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 980px) {
+  #nearbyGrid,
+  #venuesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  #nearbyGrid,
+  #venuesGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -780,6 +1067,75 @@ html[data-theme="dark"] .account__localBtn--active {
   justify-content: space-between;
   gap: 12px;
   align-items: flex-start;
+}
+
+/* Home page: normalize venue card heights so longer content doesn't stretch cards */
+#venuesGrid .card,
+#nearbyGrid .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Let left side shrink so rating badge always fits */
+#venuesGrid .card__top > div,
+#nearbyGrid .card__top > div {
+  min-width: 0;
+}
+
+#venuesGrid .badge,
+#nearbyGrid .badge {
+  flex: 0 0 auto;
+}
+
+#venuesGrid .card__name,
+#nearbyGrid .card__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+#venuesGrid .card__category,
+#nearbyGrid .card__category {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#venuesGrid .card__meta,
+#nearbyGrid .card__meta {
+  margin-top: auto;
+}
+
+#venuesGrid .card__row,
+#nearbyGrid .card__row {
+  min-width: 0;
+  align-items: flex-start;
+}
+
+#venuesGrid .card__value,
+#nearbyGrid .card__value {
+  min-width: 0;
+  text-align: right;
+}
+
+/* Address can take up to 2 lines (still keeps cards aligned) */
+#venuesGrid .card__meta .card__row:nth-child(1) .card__value,
+#nearbyGrid .card__meta .card__row:nth-child(1) .card__value {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+}
+
+/* Other meta values: single line with ellipsis */
+#venuesGrid .card__meta .card__row:not(:nth-child(1)) .card__value,
+#nearbyGrid .card__meta .card__row:not(:nth-child(1)) .card__value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card__name {

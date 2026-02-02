@@ -134,7 +134,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/change-local-settings")
+    @PatchMapping("/update-local")
     @PreAuthorize("hasRole('PROVIDER')")
     public ResponseEntity<Void> changeLocalSettings(@RequestBody LocalDto localDto){
         localService.updateLocal(localDto);

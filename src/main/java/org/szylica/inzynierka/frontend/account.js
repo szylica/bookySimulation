@@ -470,6 +470,23 @@ async function fetchMyLocals() {
   return Array.isArray(data) ? data : [];
 }
 
+async function fetchWorkerVisits() {
+  const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
+  const url = `${apiBase}/api/user/get-worker-visits`;
+
+  const res =
+    (await apiFetch?.(url, { method: "GET", headers: { Accept: "application/json" } })) ??
+    (await fetch(url, { method: "GET", headers: { Accept: "application/json" }, credentials: "include" }));
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json().catch(() => null);
+  return Array.isArray(data) ? data : [];
+}
+
 function validateSessionOnEnter() {
   const apiBase = (window.API_BASE ?? "http://localhost:8080").replace(/\/$/, "");
 
@@ -673,11 +690,11 @@ async function updateLocalData(localId, updates) {
   const payload = { id: Number(localId), ...(updates ?? {}) };
 
   const res = await (apiFetch?.(url, {
-    method: "POST",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   }) ?? fetch(url, {
-    method: "POST",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
     credentials: "include",
@@ -1479,6 +1496,388 @@ function renderWorkerEmployment() {
     });
 }
 
+function renderWorkerSchedule() {
+  if (!els.content) return;
+
+  const title = document.createElement("h2");
+  title.className = "form__title";
+  title.textContent = "Grafik";
+
+  const note = document.createElement("p");
+  note.className = "form__note";
+  note.textContent = "Ładowanie wizyt…";
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "schedule__toolbar";
+
+  const prevBtn = document.createElement("button");
+  prevBtn.type = "button";
+  prevBtn.className = "login schedule__navBtn";
+  prevBtn.textContent = "← Poprzedni tydzień";
+
+  const nextBtn = document.createElement("button");
+  nextBtn.type = "button";
+  nextBtn.className = "login schedule__navBtn";
+  nextBtn.textContent = "Następny tydzień →";
+
+  const weekLabel = document.createElement("div");
+  weekLabel.className = "schedule__week";
+  weekLabel.textContent = "—";
+
+  toolbar.append(prevBtn, weekLabel, nextBtn);
+
+  const scroller = document.createElement("div");
+  scroller.className = "scheduleScroller";
+  scroller.setAttribute("aria-busy", "true");
+
+  const grid = document.createElement("div");
+  grid.className = "scheduleGrid";
+  scroller.appendChild(grid);
+
+  els.content.replaceChildren(title, note, toolbar, scroller);
+
+  const stripZoneIdSuffix = (value) => {
+    const s = (value ?? "").toString().trim();
+    if (!s) return "";
+    const idx = s.indexOf("[");
+    return idx > 0 ? s.slice(0, idx) : s;
+  };
+
+  const parseVisitDate = (visit) => {
+    const raw =
+      visit?.date ??
+      visit?.startTime ??
+      visit?.visitTime ??
+      visit?.time ??
+      visit?.startDate ??
+      null;
+    if (!raw) return null;
+    const d = new Date(stripZoneIdSuffix(raw));
+    if (Number.isNaN(d.getTime())) return null;
+    return d;
+  };
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const formatHHMM = (d) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  const formatDayLabel = (d) => {
+    try {
+      return d.toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit" });
+    } catch {
+      return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}`;
+    }
+  };
+
+  const startOfWeekMonday = (date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay();
+    // JS: 0 = Sunday, 1 = Monday
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return d;
+  };
+
+  const addDays = (date, days) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + Number(days));
+    return d;
+  };
+
+  const isSameDay = (a, b) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  const dayNames = [
+    "Poniedziałek",
+    "Wtorek",
+    "Środa",
+    "Czwartek",
+    "Piątek",
+    "Sobota",
+    "Niedziela",
+  ];
+
+  let all = [];
+  let weekStart = startOfWeekMonday(new Date());
+
+  const pick = (visit, keys) => {
+    for (const k of keys) {
+      const v = visit?.[k];
+      if (v != null && String(v).trim()) return String(v).trim();
+    }
+    return "";
+  };
+
+  const escapeHtml = (value) =>
+    (value ?? "")
+      .toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  const ensureVisitModal = () => {
+    const existing = document.getElementById("visitModalOverlay");
+    if (existing) return existing;
+
+    const overlay = document.createElement("div");
+    overlay.id = "visitModalOverlay";
+    overlay.className = "modalOverlay";
+    overlay.setAttribute("hidden", "");
+
+    overlay.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="visitModalTitle" tabindex="-1">
+        <div class="modal__head">
+          <div class="modal__title" id="visitModalTitle">Szczegóły wizyty</div>
+          <button type="button" class="modal__close" id="visitModalClose" aria-label="Zamknij">✕</button>
+        </div>
+        <div class="modal__body" id="visitModalBody"></div>
+      </div>
+    `;
+
+    const closeBtn = overlay.querySelector("#visitModalClose");
+    const dialog = overlay.querySelector(".modal");
+    const close = () => closeVisitModal();
+
+    closeBtn?.addEventListener("click", close);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !overlay.hasAttribute("hidden")) close();
+    });
+
+    document.body.appendChild(overlay);
+    // keep references on element (simple store)
+    overlay.__dialog = dialog;
+    return overlay;
+  };
+
+  let lastFocusedEl = null;
+  const openVisitModal = (visit, whenDate) => {
+    const overlay = ensureVisitModal();
+    const body = overlay.querySelector("#visitModalBody");
+    const titleEl = overlay.querySelector("#visitModalTitle");
+
+    const serviceName = (visit?.serviceName ?? "").toString().trim() || "Wizyta";
+    const serviceDesc = (visit?.serviceDescription ?? "").toString().trim();
+    const durationMin = Number(visit?.duration);
+    const durationLabel = Number.isFinite(durationMin) && durationMin > 0 ? `${durationMin} min` : "—";
+    const price = visit?.price;
+    const priceLabel = typeof price === "number" ? `${price.toFixed(2)} zł` : price ? `${price} zł` : "—";
+
+    const customerFullName =
+      [visit?.customer?.name, visit?.customer?.surname]
+        .map((x) => (x ?? "").toString().trim())
+        .filter(Boolean)
+        .join(" ") || "—";
+    const customerPhone = (visit?.customer?.phone ?? "").toString().trim() || "—";
+
+    const localName = (visit?.local?.name ?? "").toString().trim() || "—";
+    const localCity = (visit?.local?.city ?? "").toString().trim();
+    const localAddress = (visit?.local?.address ?? "").toString().trim();
+    const localPhone = (visit?.local?.phone ?? "").toString().trim();
+    const localAddressLabel = [localCity, localAddress].filter(Boolean).join(", ") || "—";
+    const localPhoneLabel = localPhone || "—";
+
+    const dateLabel = whenDate
+      ? (() => {
+          try {
+            return whenDate.toLocaleString("pl-PL", {
+              weekday: "long",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          } catch {
+            return whenDate.toString();
+          }
+        })()
+      : "—";
+
+    if (titleEl) titleEl.textContent = serviceName;
+
+    if (body) {
+      body.innerHTML = `
+        <div class="modal__grid">
+          <div class="modal__row"><div class="modal__label">Data</div><div class="modal__value">${escapeHtml(dateLabel)}</div></div>
+          <div class="modal__row"><div class="modal__label">Czas trwania</div><div class="modal__value">${escapeHtml(durationLabel)}</div></div>
+          <div class="modal__row"><div class="modal__label">Cena</div><div class="modal__value">${escapeHtml(priceLabel)}</div></div>
+
+          <div class="modal__divider"></div>
+
+          <div class="modal__row"><div class="modal__label">Klient</div><div class="modal__value">${escapeHtml(customerFullName)}</div></div>
+          <div class="modal__row"><div class="modal__label">Telefon klienta</div><div class="modal__value">${escapeHtml(customerPhone)}</div></div>
+
+          <div class="modal__divider"></div>
+
+          <div class="modal__row"><div class="modal__label">Lokal</div><div class="modal__value">${escapeHtml(localName)}</div></div>
+          <div class="modal__row"><div class="modal__label">Adres</div><div class="modal__value">${escapeHtml(localAddressLabel)}</div></div>
+          <div class="modal__row"><div class="modal__label">Telefon lokalu</div><div class="modal__value">${escapeHtml(localPhoneLabel)}</div></div>
+          ${serviceDesc ? `<div class="modal__divider"></div>
+          <div class="modal__row"><div class="modal__label">Opis usługi</div><div class="modal__value">${escapeHtml(serviceDesc)}</div></div>` : ""}
+        </div>
+      `;
+    }
+
+    lastFocusedEl = document.activeElement;
+    overlay.removeAttribute("hidden");
+    document.body.classList.add("modalOpen");
+    const closeBtn = overlay.querySelector("#visitModalClose");
+    closeBtn?.focus?.();
+  };
+
+  const closeVisitModal = () => {
+    const overlay = document.getElementById("visitModalOverlay");
+    if (!overlay) return;
+    overlay.setAttribute("hidden", "");
+    document.body.classList.remove("modalOpen");
+    if (lastFocusedEl && typeof lastFocusedEl.focus === "function") {
+      lastFocusedEl.focus();
+    }
+    lastFocusedEl = null;
+  };
+
+  const render = () => {
+    const weekEnd = addDays(weekStart, 6);
+    weekLabel.textContent = `${formatDayLabel(weekStart)}–${formatDayLabel(weekEnd)}`;
+
+    const now = Date.now();
+    const upcoming = all
+      .map((v) => ({ visit: v, date: parseVisitDate(v) }))
+      .filter((x) => x.date && x.date.getTime() >= now)
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+    const cols = days.map((day, idx) => {
+      const col = document.createElement("div");
+      col.className = "scheduleDay";
+
+      const head = document.createElement("div");
+      head.className = "scheduleDay__head";
+
+      const h = document.createElement("div");
+      h.className = "scheduleDay__title";
+      h.textContent = dayNames[idx];
+
+      const sub = document.createElement("div");
+      sub.className = "scheduleDay__date";
+      sub.textContent = formatDayLabel(day);
+
+      head.append(h, sub);
+
+      const list = document.createElement("div");
+      list.className = "scheduleDay__list";
+
+      const items = upcoming.filter((x) => isSameDay(x.date, day));
+      if (items.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "scheduleVisit scheduleVisit--empty";
+        empty.textContent = "Brak wizyt";
+        list.append(empty);
+      } else {
+        for (const it of items) {
+          const v = it.visit;
+          const serviceName = pick(v, ["serviceName", "service", "serviceTitle", "name"]);
+
+          const localName =
+            (v?.local?.name ?? "").toString().trim() ||
+            pick(v, ["localName", "venueName"]);
+
+          const customerFullName =
+            [v?.customer?.name, v?.customer?.surname]
+              .map((x) => (x ?? "").toString().trim())
+              .filter(Boolean)
+              .join(" ") ||
+            pick(v, ["customerName", "clientName", "userName"]);
+
+          const customerPhone =
+            (v?.customer?.phone ?? "").toString().trim() || pick(v, ["customerPhone", "clientPhone", "phone"]);
+
+          const durationMin = Number(v?.duration);
+          const durationLabel = Number.isFinite(durationMin) && durationMin > 0 ? `${durationMin} min` : "";
+
+          const row = document.createElement("div");
+          row.className = "scheduleVisit scheduleVisit--clickable";
+          row.tabIndex = 0;
+          row.setAttribute("role", "button");
+          row.setAttribute("aria-label", "Pokaż szczegóły wizyty");
+
+          const t = document.createElement("div");
+          t.className = "scheduleVisit__time";
+          t.textContent = formatHHMM(it.date);
+
+          const main = document.createElement("div");
+          main.className = "scheduleVisit__main";
+
+          const line1 = document.createElement("div");
+          line1.className = "scheduleVisit__title";
+          line1.textContent = serviceName || "Wizyta";
+
+          const line2 = document.createElement("div");
+          line2.className = "scheduleVisit__meta";
+          const metaParts = [];
+          if (localName) metaParts.push(localName);
+          if (customerFullName) metaParts.push(`Klient: ${customerFullName}`);
+          if (customerPhone) metaParts.push(`Tel: ${customerPhone}`);
+          if (durationLabel) metaParts.push(`Czas: ${durationLabel}`);
+          line2.textContent = metaParts.join(" • ") || "—";
+
+          main.append(line1, line2);
+          row.append(t, main);
+
+          row.addEventListener("click", () => openVisitModal(v, it.date));
+          row.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openVisitModal(v, it.date);
+            }
+          });
+
+          list.append(row);
+        }
+      }
+
+      col.append(head, list);
+      return col;
+    });
+
+    grid.replaceChildren(...cols);
+  };
+
+  const setWeekStart = (next) => {
+    weekStart = startOfWeekMonday(next);
+    render();
+  };
+
+  prevBtn.addEventListener("click", () => {
+    setWeekStart(addDays(weekStart, -7));
+  });
+
+  nextBtn.addEventListener("click", () => {
+    setWeekStart(addDays(weekStart, 7));
+  });
+
+  Promise.resolve()
+    .then(() => fetchWorkerVisits())
+    .then((visits) => {
+      scroller.setAttribute("aria-busy", "false");
+      all = Array.isArray(visits) ? visits : [];
+      note.textContent = "";
+      render();
+    })
+    .catch((err) => {
+      scroller.setAttribute("aria-busy", "false");
+      note.textContent = `Nie udało się pobrać wizyt: ${err?.message ?? err}`;
+      grid.replaceChildren();
+    });
+}
+
 function renderCustomerAccountSettings() {
   if (!els.content) return;
 
@@ -1844,6 +2243,18 @@ function renderContent(tabId) {
 
   if (tab.id === "employment" && role === "ROLE_WORKER") {
     renderWorkerEmployment();
+
+    for (const btn of els.tabs?.querySelectorAll?.("button[data-tab]") ?? []) {
+      btn.setAttribute(
+        "aria-current",
+        btn.getAttribute("data-tab") === tab.id ? "page" : "false"
+      );
+    }
+    return;
+  }
+
+  if (tab.id === "schedule" && role === "ROLE_WORKER") {
+    renderWorkerSchedule();
 
     for (const btn of els.tabs?.querySelectorAll?.("button[data-tab]") ?? []) {
       btn.setAttribute(
