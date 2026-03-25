@@ -1,4 +1,4 @@
-# Inżynierka – system rezerwacji wizyt (Spring Boot)
+# System rezerwacji wizyt (Spring Boot)
 
 Aplikacja webowa typu **BookMe** do zarządzania lokalami/usługami oraz umawiania wizyt.
 Backend jest zbudowany w **Spring Boot 4**, wykorzystuje **PostgreSQL** (dane) oraz **Redis** (sesje użytkowników przez Spring Session).
