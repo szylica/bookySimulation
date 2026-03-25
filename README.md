@@ -68,11 +68,6 @@ Backend jest zbudowany w **Spring Boot 4**, wykorzystuje **PostgreSQL** (dane) o
 
 Podstawowa konfiguracja jest w `src/main/resources/application.properties`:
 
-- `spring.datasource.url=jdbc:postgresql://localhost:5433/inzynierka_db`
-- `spring.datasource.username=root`
-- `spring.datasource.password=inzynierka`
-- `spring.jpa.hibernate.ddl-auto=update`
-
 Uwagi:
 - Domyślny port aplikacji Spring Boot: **8080**
 - CORS jest ustawiony na `http://localhost:3000` i wymaga `credentials` (sesja/cookie)
